@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Deadlock Wiki TMA</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0a0f12;
+            --card-bg: #141e24;
+            --accent: #00f2fe;
+            --accent-soft: #4ae3b5;
+            --text: #d1d9e0;
+            --text-dim: #8ba0b0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Шапка с логотипом-книгой */
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #1a2b35;
+            background: linear-gradient(to bottom, #000, var(--bg-color));
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Заглушка под наш логотип с книгой */
+        .book-icon {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .accent-text { color: var(--accent); }
+
+        /* Навигация (Табы) */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background: #000;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tab {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        /* Список героев */
+        .content { padding: 15px; }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--accent-soft);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .hero-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hero-row {
+            background: var(--card-bg);
+            border-left: 4px solid var(--accent-soft);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .hero-info h3 { margin: 0; font-size: 1.1rem; }
+        .hero-info span { font-size: 0.75rem; color: var(--text-dim); }
+
+        .arrow { color: var(--accent); font-weight: bold; }
+
+        /* Кнопка в стиле Telegram */
+        .main-button {
+            background: var(--accent);
+            color: #000;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <div class="book-icon">📖</div> <h1>DEADLOCK <span class="accent-text">ARCHIVE</span></h1>
+    </div>
+</header>
+
+<div class="tabs">
+    <div class="tab active">Герои</div>
+    <div class="tab">Предметы</div>
+    <div class="tab">Патчи</div>
+</div>
+
+<div class="content">
+    <div class="section-title">Все персонажи</div>
+    
+    <div class="hero-list" id="heroList">
+        <div class="hero-row" onclick="openHero('Abrams')">
+            <div class="hero-info">
+                <h3>Abrams</h3>
+                <span>VITALITY / MELEE</span>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+
+        <div class="hero-row" onclick="openHero('Seven')">
+            <div class="hero-info">
+                <h3>Seven</h3>
+                <span>SPIRIT / AOE</span>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+
+        <div class="hero-row" onclick="openHero('Infernus')">
+            <div class="hero-info">
+                <h3>Infernus</h3>
+                <span>DPS / BURN</span>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Инициализация Telegram
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    // Настройка главной кнопки Telegram
+    tg.MainButton.setText("ПОИСК ПО ГЕРОЯМ");
+    tg.MainButton.show();
+    tg.MainButton.setParams({
+        color: "#00f2fe",
+        text_color: "#000000"
+    });
+
+    function openHero(name) {
+        tg.showAlert("Вы выбрали героя: " + name + ". Скоро здесь будет полная статистика!");
+        tg.HapticFeedback.impactOccurred('medium'); // Вибрация при нажатии
+    }
+</script>
+
+</body>
+</html>
