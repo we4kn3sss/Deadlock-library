@@ -2,182 +2,216 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Deadlock Wiki TMA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Origami Flight TWA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #0a0f12;
-            --card-bg: #141e24;
-            --accent: #00f2fe;
-            --accent-soft: #4ae3b5;
-            --text: #d1d9e0;
-            --text-dim: #8ba0b0;
-        }
-
-        body {
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: #d1d9e0; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
-
-        /* Шапка с логотипом-книгой */
-        header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid #1a2b35;
-            background: linear-gradient(to bottom, #000, var(--bg-color));
-        }
-
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Заглушка под наш логотип с книгой */
-        .book-icon {
-            width: 50px;
-            height: 50px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
-        }
-
-        h1 {
-            font-size: 1.2rem;
-            margin: 0;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .accent-text { color: var(--accent); }
-
-        /* Навигация (Табы) */
-        .tabs {
-            display: flex;
-            justify-content: space-around;
-            background: #000;
-            padding: 10px 0;
-            position: sticky;
-            top: 0;
+        
+        #ui { 
+            position: absolute; 
+            top: env(safe-area-inset-top, 20px); 
+            left: 20px; 
+            color: #444; 
+            font-size: 22px; 
+            font-weight: 800; 
+            pointer-events: none; 
             z-index: 10;
-        }
-
-        .tab {
-            font-size: 0.8rem;
-            color: var(--text-dim);
             text-transform: uppercase;
-            font-weight: bold;
-            padding: 5px 10px;
-        }
-
-        .tab.active {
-            color: var(--accent);
-            border-bottom: 2px solid var(--accent);
-        }
-
-        /* Список героев */
-        .content { padding: 15px; }
-
-        .section-title {
-            font-size: 0.9rem;
-            color: var(--accent-soft);
-            text-transform: uppercase;
-            margin-bottom: 15px;
             letter-spacing: 1px;
         }
 
-        .hero-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        #controls { 
+            position: absolute; 
+            bottom: env(safe-area-inset-bottom, 30px); 
+            left: 50%; 
+            transform: translateX(-50%); 
+            display: grid; 
+            grid-template-columns: repeat(3, 75px); 
+            gap: 15px; 
+            z-index: 10;
+        }
+        
+        .btn { 
+            width: 75px; 
+            height: 75px; 
+            background: rgba(255,255,255,0.4); 
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 28px; 
+            color: #333; 
+            touch-action: manipulation; 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .btn:active { 
+            background: rgba(255,255,255,0.7); 
+            transform: scale(0.9); 
         }
 
-        .hero-row {
-            background: var(--card-bg);
-            border-left: 4px solid var(--accent-soft);
-            padding: 15px;
-            border-radius: 0 8px 8px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .hero-info h3 { margin: 0; font-size: 1.1rem; }
-        .hero-info span { font-size: 0.75rem; color: var(--text-dim); }
-
-        .arrow { color: var(--accent); font-weight: bold; }
-
-        /* Кнопка в стиле Telegram */
-        .main-button {
-            background: var(--accent);
-            color: #000;
-            padding: 15px;
-            text-align: center;
-            border-radius: 10px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo-container">
-        <div class="book-icon">📖</div> <h1>DEADLOCK <span class="accent-text">ARCHIVE</span></h1>
-    </div>
-</header>
-
-<div class="tabs">
-    <div class="tab active">Герои</div>
-    <div class="tab">Предметы</div>
-    <div class="tab">Патчи</div>
-</div>
-
-<div class="content">
-    <div class="section-title">Все персонажи</div>
+    <div id="ui">SCORE: <span id="score">0</span></div>
     
-    <div class="hero-list" id="heroList">
-        <div class="hero-row" onclick="openHero('Abrams')">
-            <div class="hero-info">
-                <h3>Abrams</h3>
-                <span>VITALITY / MELEE</span>
-            </div>
-            <div class="arrow">→</div>
-        </div>
-
-        <div class="hero-row" onclick="openHero('Seven')">
-            <div class="hero-info">
-                <h3>Seven</h3>
-                <span>SPIRIT / AOE</span>
-            </div>
-            <div class="arrow">→</div>
-        </div>
-
-        <div class="hero-row" onclick="openHero('Infernus')">
-            <div class="hero-info">
-                <h3>Infernus</h3>
-                <span>DPS / BURN</span>
-            </div>
-            <div class="arrow">→</div>
-        </div>
+    <div id="controls">
+        <div></div><div class="btn" id="up">↑</div><div></div>
+        <div class="btn" id="left">←</div><div class="btn" id="down">↓</div><div class="btn" id="right">→</div>
     </div>
-</div>
 
-<script>
-    // Инициализация Telegram
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Инициализация Telegram
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.headerColor = '#d1d9e0';
+
+        let score = 0;
+        const keys = { up: false, down: false, left: false, right: false };
+
+        // Сцена
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xd1d9e0);
+        scene.fog = new THREE.Fog(0xd1d9e0, 15, 90);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Создание самолетика (Оригами)
+        const planeGroup = new THREE.Group();
+        const paperMat = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, 
+            side: THREE.DoubleSide,
+            roughness: 0.7,
+            metalness: 0.1
+        });
+
+        function createShape(pts) {
+            const s = new THREE.Shape();
+            s.moveTo(pts.x, pts.y);
+            for(let i=1; i<pts.length; i++) s.lineTo(pts[i].x, pts[i].y);
+            return new THREE.Mesh(new THREE.ShapeGeometry(s), paperMat);
+        }
+
+        // Киль (низ)
+        const keel = new THREE.Mesh(new THREE.ConeGeometry(0.12, 2.2, 3), paperMat);
+        keel.rotation.x = Math.PI / 2;
+        keel.rotation.z = Math.PI;
+        keel.position.y = -0.15;
+        keel.scale.set(0.3, 1, 1);
+        planeGroup.add(keel);
+
+        // Основные крылья
+        const leftWing = createShape([{x:0,y:1.1}, {x:-1.3,y:-1}, {x:-0.2,y:-0.7}, {x:0,y:-0.5}]);
+        leftWing.rotation.x = -Math.PI / 2;
+        leftWing.rotation.y = -0.08;
+        planeGroup.add(leftWing);
+
+        const rightWing = createShape([{x:0,y:1.1}, {x:1.3,y:-1}, {x:0.2,y:-0.7}, {x:0,y:-0.5}]);
+        rightWing.rotation.x = -Math.PI / 2;
+        rightWing.rotation.y = 0.08;
+        planeGroup.add(rightWing);
+
+        scene.add(planeGroup);
+
+        // Свет
+        const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+        sun.position.set(5, 10, 5);
+        scene.add(sun);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+        // Кольца
+        const rings = [];
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x999999 });
+        function spawnRing(z) {
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.06, 12, 32), ringMat);
+            ring.position.set(Math.random()*16-8, Math.random()*10-5, z);
+            scene.add(ring);
+            rings.push(ring);
+        }
+        for(let i=1; i<=7; i++) spawnRing(-i * 35);
+
+        // Управление
+        const setupControl = (id, key) => {
+            const el = document.getElementById(id);
+            const press = (e) => { e.preventDefault(); keys[key] = true; if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); };
+            const release = (e) => { e.preventDefault(); keys[key] = false; };
+            el.addEventListener('touchstart', press);
+            el.addEventListener('touchend', release);
+            el.addEventListener('mousedown', press);
+            el.addEventListener('mouseup', release);
+        };
+        ['up','down','left','right'].forEach(k => setupControl(k, k));
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            planeGroup.position.z -= 0.3; // Скорость полета
+
+            let rZ = 0, rX = 0;
+            const step = 0.15;
+
+            if (keys.left) { planeGroup.position.x -= step; rZ = 0.6; }
+            if (keys.right) { planeGroup.position.x += step; rZ = -0.6; }
+            if (keys.up) { planeGroup.position.y += step; rX = -0.3; }
+            if (keys.down) { planeGroup.position.y -= step; rX = 0.3; }
+
+            planeGroup.rotation.z = THREE.MathUtils.lerp(planeGroup.rotation.z, rZ, 0.1);
+            planeGroup.rotation.x = THREE.MathUtils.lerp(planeGroup.rotation.x, rX, 0.1);
+
+            camera.position.set(
+                THREE.MathUtils.lerp(camera.position.x, planeGroup.position.x, 0.08),
+                THREE.MathUtils.lerp(camera.position.y, planeGroup.position.y + 1, 0.08),
+                planeGroup.position.z + 6
+            );
+            camera.lookAt(planeGroup.position.x, planeGroup.position.y, planeGroup.position.z - 4);
+
+            rings.forEach(r => {
+                if (planeGroup.position.distanceTo(r.position) < 2.5) {
+                    score += 10;
+                    document.getElementById('score').innerText = score;
+                    r.position.z -= 245;
+                    r.position.x = Math.random()*16-8;
+                    r.position.y = Math.random()*10-5;
+                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                }
+                if (r.position.z > planeGroup.position.z + 5) r.position.z -= 245;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
+            
+            
     tg.ready();
 
     // Настройка главной кнопки Telegram
