@@ -3,70 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Paperplane Fix</title>
+    <title>Paperplane Static Joy</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             overflow: hidden; background: #d1d9e0; 
-            position: fixed; touch-action: none;
+            position: fixed; touch-action: none; font-family: sans-serif;
         }
 
-        /* Контейнер для 3D сцены */
-        #game-canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
-        }
+        /* Полотно игры */
+        #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
-        /* Слой интерфейса */
-        #overlay {
+        /* Интерфейс */
+        #ui {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 10;
         }
+        #score-box { position: absolute; top: env(safe-area-inset-top, 20px); left: 20px; font-weight: 900; font-size: 22px; color: #444; }
+        #lives-box { position: absolute; top: env(safe-area-inset-top, 20px); right: 20px; font-size: 22px; }
 
-        #ui-header {
-            padding: env(safe-area-inset-top, 20px) 20px 0;
-            display: flex; justify-content: space-between;
-            color: #444; font-family: sans-serif; font-weight: 800; font-size: 20px;
+        /* Зона джойстика — СТАТИЧНАЯ */
+        #joy-zone {
+            position: absolute; bottom: 40px; left: 40px;
+            width: 120px; height: 120px;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            pointer-events: auto; /* Важно: эта зона ловит касания */
         }
-
-        /* Стик — теперь он FIXED и с высоким z-index */
-        #j-base { 
-            position: fixed; width: 80px; height: 80px; 
-            background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.5); 
-            border-radius: 50%; display: none; z-index: 100;
-        }
-        #j-stick { 
-            position: fixed; width: 40px; height: 40px; 
-            background: #fff; border-radius: 50%; 
-            display: none; z-index: 101; box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        #joy-stick {
+            position: absolute; top: 50%; left: 50%;
+            width: 50px; height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         #game-over { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(209, 217, 224, 0.98); display: none; 
             flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 200; pointer-events: auto; font-family: sans-serif;
+            z-index: 100; pointer-events: auto;
         }
-        #restart-btn { padding: 15px 40px; background: #333; color: #fff; border-radius: 15px; font-weight: bold; }
+        #restart-btn { padding: 15px 40px; background: #333; color: #fff; border-radius: 15px; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div id="game-canvas"></div>
 
-    <div id="overlay">
-        <div id="ui-header">
-            <div>SCORE: <span id="score">0</span></div>
-            <div id="lives">🖤🖤🖤</div>
-        </div>
-        <div id="j-base"></div>
-        <div id="j-stick"></div>
+    <div id="ui">
+        <div id="score-box">SCORE: <span id="score">0</span></div>
+        <div id="lives-box" id="lives">🖤🖤🖤</div>
         
+        <div id="joy-zone">
+            <div id="joy-stick"></div>
+        </div>
+
         <div id="game-over">
-            <h1>GAME OVER</h1>
-            <p id="f-score">SCORE: 0</p>
-            <div id="restart-btn" onclick="resetGame()">RESTART</div>
+            <h1 style="font-size: 32px;">GAME OVER</h1>
+            <p id="final-score" style="font-size: 20px;">SCORE: 0</p>
+            <div id="restart-btn" onclick="location.reload()">ИГРАТЬ СНОВА</div>
         </div>
     </div>
 
@@ -77,16 +77,15 @@
         tg.ready(); tg.expand();
 
         let score = 0, lives = 3, isGameOver = false, speed = 0.22;
-        const vel = { x: 0, y: 0 }, friction = 0.92, accel = 0.04;
-        let stickActive = false, startPos = { x: 0, y: 0 }, input = { x: 0, y: 0 };
+        let input = { x: 0, y: 0 }, vel = { x: 0, y: 0 };
+        
+        const joyZone = document.getElementById('joy-zone');
+        const joyStick = document.getElementById('joy-stick');
 
-        const jBase = document.getElementById('j-base');
-        const jStick = document.getElementById('j-stick');
-
-        // Сцена
+        // --- ГРАФИКА ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xd1d9e0);
-        scene.fog = new THREE.Fog(0xd1d9e0, 20, 100);
+        scene.fog = new THREE.Fog(0xd1d9e0, 20, 90);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -94,135 +93,98 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('game-canvas').appendChild(renderer.domElement);
 
-        // Самолет
         const plane = new THREE.Group();
         const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: 2 });
-        function addWing(p) {
-            const s = new THREE.Shape(); s.moveTo(p.x, p.y);
-            for(let i=1;i<p.length;i++) s.lineTo(p[i].x, p[i].y);
-            plane.add(new THREE.Mesh(new THREE.ShapeGeometry(s), mat));
-        }
-        addWing([{x:0,y:1.1}, {x:-1.3,y:-1}, {x:-0.2,y:-0.7}, {x:0,y:-0.5}]);
-        addWing([{x:0,y:1.1}, {x:1.3,y:-1}, {x:0.2,y:-0.7}, {x:0,y:-0.5}]);
+        const shape = new THREE.Shape();
+        shape.moveTo(0, 1.2); shape.lineTo(-1.5, -1); shape.lineTo(0, -0.5); shape.lineTo(1.5, -1); shape.lineTo(0, 1.2);
+        const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), mat);
+        mesh.rotation.x = -Math.PI/2;
+        plane.add(mesh);
         scene.add(plane);
-        scene.add(new THREE.DirectionalLight(0xffffff, 1).add(new THREE.AmbientLight(0xffffff, 0.5)));
+
+        scene.add(new THREE.DirectionalLight(0xffffff, 1).add(new THREE.AmbientLight(0xffffff, 0.6)));
 
         const rings = [];
-        for(let i=1; i<=7; i++) {
-            const r = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.1, 12, 32), new THREE.MeshStandardMaterial({color:0xffffff}));
-            r.position.set(Math.random()*14-7, Math.random()*10-5, -i*40);
-            r.userData.passed = false;
+        for(let i=0; i<8; i++) {
+            const r = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.1, 12, 24), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            r.position.set(Math.random()*14-7, Math.random()*10-5, -i*35 - 30);
             scene.add(r); rings.push(r);
         }
 
-        // --- Исправленное управление ---
-        window.addEventListener('touchstart', (e) => {
-            if (isGameOver) return;
-            const t = e.touches;
+        // --- УПРАВЛЕНИЕ (СТАТИЧНОЕ) ---
+        joyZone.addEventListener('touchstart', (e) => { e.preventDefault(); }, {passive: false});
+        joyZone.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches;
+            const rect = joyZone.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
             
-            // Активируем стик только если нажали в нижней части экрана
-            if (t.clientY < window.innerHeight * 0.3) return;
-
-            stickActive = true;
-            startPos = { x: t.clientX, y: t.clientY };
-            
-            jBase.style.display = 'block';
-            jStick.style.display = 'block';
-            jBase.style.left = `${startPos.x - 40}px`;
-            jBase.style.top = `${startPos.y - 40}px`;
-            jStick.style.left = `${startPos.x - 20}px`;
-            jStick.style.top = `${startPos.y - 20}px`;
-        }, {passive: false});
-
-        window.addEventListener('touchmove', (e) => {
-            if (!stickActive) return;
-            const t = e.touches;
-            const dx = t.clientX - startPos.x;
-            const dy = t.clientY - startPos.y;
-            const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
+            let dx = touch.clientX - centerX;
+            let dy = touch.clientY - centerY;
+            const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60);
             const angle = Math.atan2(dy, dx);
+
+            const lx = Math.cos(angle) * dist;
+            const ly = Math.sin(angle) * dist;
+
+            joyStick.style.transform = `translate(calc(-50% + ${lx}px), calc(-50% + ${ly}px))`;
             
-            const mx = Math.cos(angle) * dist;
-            const my = Math.sin(angle) * dist;
-            
-            jStick.style.left = `${startPos.x + mx - 20}px`;
-            jStick.style.top = `${startPos.y + my - 20}px`;
-            
-            input.x = mx / 40; 
-            input.y = -(my / 40);
+            input.x = lx / 60;
+            input.y = -(ly / 60);
         }, {passive: false});
 
-        window.addEventListener('touchend', () => {
-            stickActive = false; input = { x: 0, y: 0 };
-            jBase.style.display = 'none'; jStick.style.display = 'none';
+        joyZone.addEventListener('touchend', () => {
+            joyStick.style.transform = `translate(-50%, -50%)`;
+            input.x = 0; input.y = 0;
         });
 
-        function resetGame() {
-            score = 0; lives = 3; isGameOver = false; speed = 0.22;
-            document.getElementById('score').innerText = "0";
-            document.getElementById('lives').innerText = "🖤🖤🖤";
-            document.getElementById('game-over').style.display = 'none';
-            plane.position.set(0,0,0);
-            rings.forEach((r, i) => {
-                r.userData.passed = false;
-                r.position.set(Math.random()*14-7, Math.random()*10-5, -(i+1)*40);
-            });
-        }
-
+        // --- ЦИКЛ ИГРЫ ---
         function animate() {
+            if (isGameOver) return;
             requestAnimationFrame(animate);
-            if (isGameOver) { renderer.render(scene, camera); return; }
 
             plane.position.z -= speed;
-            vel.x = (vel.x + input.x * accel) * friction;
-            vel.y = (vel.y + input.y * accel) * friction;
-            plane.position.x += vel.x; plane.position.y += vel.y;
-            
-            plane.rotation.z = THREE.MathUtils.lerp(plane.rotation.z, -vel.x * 8, 0.1);
-            plane.rotation.x = THREE.MathUtils.lerp(plane.rotation.x, vel.y * 4, 0.1);
+            vel.x = (vel.x + input.x * 0.05) * 0.9;
+            vel.y = (vel.y + input.y * 0.05) * 0.9;
+            plane.position.x += vel.x;
+            plane.position.y += vel.y;
 
-            camera.position.set(
-                THREE.MathUtils.lerp(camera.position.x, plane.position.x, 0.08),
-                THREE.MathUtils.lerp(camera.position.y, plane.position.y + 1, 0.08),
-                plane.position.z + 6
-            );
-            camera.lookAt(plane.position.x, plane.position.y, plane.position.z - 4);
+            plane.rotation.z = -vel.x * 5;
+            plane.rotation.x = vel.y * 3;
+
+            camera.position.set(plane.position.x * 0.5, plane.position.y * 0.5 + 1.5, plane.position.z + 7);
+            camera.lookAt(plane.position.x, plane.position.y, plane.position.z - 5);
 
             rings.forEach(r => {
-                const d = Math.sqrt((plane.position.x-r.position.x)**2 + (plane.position.y-r.position.y)**2);
-                if (!r.userData.passed && Math.abs(plane.position.z - r.position.z) < 0.6) {
-                    if (d < 2.8) {
-                        score += 10; document.getElementById('score').innerText = score;
-                        r.userData.passed = true;
-                        if (score % 100 === 0) speed *= 1.15;
-                        tg.HapticFeedback.impactOccurred('medium');
+                if (Math.abs(r.position.z - plane.position.z) < 0.5) {
+                    const d = Math.sqrt((plane.position.x - r.position.x)**2 + (plane.position.y - r.position.y)**2);
+                    if (d < 3) {
+                        score += 10;
+                        document.getElementById('score').innerText = score;
+                        r.position.z -= 280;
+                        tg.HapticFeedback.impactOccurred('light');
                     }
                 }
-                if (r.position.z > plane.position.z + 2) {
-                    if (!r.userData.passed) {
-                        lives--; document.getElementById('lives').innerText = "🖤".repeat(Math.max(0, lives));
-                        if (lives <= 0) {
-                            isGameOver = true;
-                            document.getElementById('f-score').innerText = "SCORE: " + score;
-                            document.getElementById('game-over').style.display = 'flex';
-                        }
-                        tg.HapticFeedback.notificationOccurred('error');
-                    }
-                    r.userData.passed = false; r.position.z -= 280;
+                if (r.position.z > plane.position.z + 5) {
+                    r.position.z -= 280;
                     r.position.x = Math.random()*14-7; r.position.y = Math.random()*10-5;
                 }
             });
+
             renderer.render(scene, camera);
         }
 
-        // Форсируем размер при старте
+        // Запуск через секунду, чтобы всё прогрузилось
+        setTimeout(() => {
+            animate();
+        }, 500);
+
         window.addEventListener('resize', () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        animate();
     </script>
 </body>
 </html>
