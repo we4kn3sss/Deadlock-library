@@ -48,7 +48,7 @@
         #restart-btn {
             padding: 15px 40px; background: #333; color: #fff;
             border-radius: 15px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); pointer-events: auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -60,7 +60,7 @@
     <div id="game-over">
         <h1>GAME OVER</h1>
         <p id="final-score" style="font-size: 20px; margin-bottom: 20px;">SCORE: 0</p>
-        <div id="restart-btn">ИГРАТЬ СНОВА</div>
+        <div id="restart-btn" onclick="resetGame()">ИГРАТЬ СНОВА</div>
     </div>
 
     <div id="controls">
@@ -78,9 +78,14 @@
         let score = 0;
         let lives = 3;
         let isGameOver = false;
+        let baseSpeed = 0.22; // Начальная скорость (было 0.35)
+        
+        // Для плавности управления
         const keys = { up: false, down: false, left: false, right: false };
+        const vel = { x: 0, y: 0 }; 
+        const friction = 0.92; // Коэффициент торможения (чем ближе к 1, тем плавнее)
+        const accel = 0.015;   // Мощность ускорения
 
-        // Сцена
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xd1d9e0);
         scene.fog = new THREE.Fog(0xd1d9e0, 15, 95);
@@ -91,7 +96,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Модель самолетика
         const planeGroup = new THREE.Group();
         const paperMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide, roughness: 0.7 });
 
@@ -122,7 +126,6 @@
         scene.add(sun);
         scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-        // Кольца
         const rings = [];
         const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x999999 });
         function spawnRing(z) {
@@ -134,17 +137,10 @@
         }
         for(let i=1; i<=7; i++) spawnRing(-i * 40);
 
-        // Управление (Новый метод)
         const setupControl = (id, key) => {
             const el = document.getElementById(id);
-            const start = (e) => { 
-                e.preventDefault(); 
-                if(!isGameOver) keys[key] = true; 
-            };
-            const stop = (e) => { 
-                e.preventDefault(); 
-                keys[key] = false; 
-            };
+            const start = (e) => { e.preventDefault(); if(!isGameOver) keys[key] = true; };
+            const stop = (e) => { e.preventDefault(); keys[key] = false; };
             el.addEventListener('touchstart', start, {passive: false});
             el.addEventListener('touchend', stop, {passive: false});
             el.addEventListener('mousedown', start);
@@ -161,23 +157,21 @@
             lives--;
             updateLivesDisplay();
             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-            
             paperMat.color.set(0xff0000);
             setTimeout(() => paperMat.color.set(0xffffff), 200);
-
             if (lives <= 0) gameOver();
         }
 
         function gameOver() {
             isGameOver = true;
-            // Сбрасываем нажатия
             for(let k in keys) keys[k] = false;
             document.getElementById('game-over').style.display = 'flex';
             document.getElementById('final-score').innerText = "SCORE: " + score;
         }
 
         function resetGame() {
-            score = 0; lives = 3; isGameOver = false;
+            score = 0; lives = 3; isGameOver = false; baseSpeed = 0.22;
+            vel.x = 0; vel.y = 0;
             document.getElementById('score').innerText = score;
             updateLivesDisplay();
             document.getElementById('game-over').style.display = 'none';
@@ -187,24 +181,30 @@
                 r.position.set(Math.random()*16-8, Math.random()*10-5, -(i+1)*40);
             });
         }
-        document.getElementById('restart-btn').addEventListener('click', resetGame);
-        document.getElementById('restart-btn').addEventListener('touchstart', resetGame);
 
         function animate() {
             requestAnimationFrame(animate);
             if (isGameOver) { renderer.render(scene, camera); return; }
 
-            planeGroup.position.z -= 0.35;
+            // Постоянное движение вперед
+            planeGroup.position.z -= baseSpeed;
 
-            let rZ = 0, rX = 0;
-            const step = 0.18;
-            if (keys.left) { planeGroup.position.x -= step; rZ = 0.6; }
-            if (keys.right) { planeGroup.position.x += step; rZ = -0.6; }
-            if (keys.up) { planeGroup.position.y += step; rX = -0.3; }
-            if (keys.down) { planeGroup.position.y -= step; rX = 0.3; }
+            // Плавное управление через физику (velocity)
+            if (keys.left) vel.x -= accel;
+            if (keys.right) vel.x += accel;
+            if (keys.up) vel.y += accel;
+            if (keys.down) vel.y -= accel;
 
-            planeGroup.rotation.z = THREE.MathUtils.lerp(planeGroup.rotation.z, rZ, 0.1);
-            planeGroup.rotation.x = THREE.MathUtils.lerp(planeGroup.rotation.x, rX, 0.1);
+            // Применяем трение
+            vel.x *= friction;
+            vel.y *= friction;
+
+            planeGroup.position.x += vel.x;
+            planeGroup.position.y += vel.y;
+
+            // Наклоны зависят от текущей скорости
+            planeGroup.rotation.z = THREE.MathUtils.lerp(planeGroup.rotation.z, -vel.x * 10, 0.1);
+            planeGroup.rotation.x = THREE.MathUtils.lerp(planeGroup.rotation.x, vel.y * 5, 0.1);
 
             camera.position.set(
                 THREE.MathUtils.lerp(camera.position.x, planeGroup.position.x, 0.08),
@@ -218,12 +218,19 @@
                 const dy = planeGroup.position.y - r.position.y;
                 const distanceXY = Math.sqrt(dx * dx + dy * dy);
 
-                if (!r.userData.passed && Math.abs(planeGroup.position.z - r.position.z) < 0.5) {
+                if (!r.userData.passed && Math.abs(planeGroup.position.z - r.position.z) < 0.6) {
                     if (distanceXY < 2.5) {
                         score += 10;
                         document.getElementById('score').innerText = score;
                         r.userData.passed = true;
-                        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                        
+                        // Каждые 100 очков ускоряем на 15%
+                        if (score > 0 && score % 100 === 0) {
+                            baseSpeed *= 1.15;
+                            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                        } else {
+                            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                        }
                     }
                 }
                 
