@@ -12,7 +12,8 @@
             -webkit-user-select: none; touch-action: none; 
         }
         
-        #ui { position: absolute; top: 40px; left: 20px; color: #444; font-size: 20px; font-weight: bold; z-index: 10; }
+        #ui { position: absolute; top: 40px; left: 20px; color: #444; font-size: 18px; font-weight: bold; z-index: 10; }
+        #debug { position: absolute; top: 70px; left: 20px; color: red; font-size: 12px; z-index: 10; }
         #lives { position: absolute; top: 40px; right: 20px; font-size: 22px; z-index: 10; }
 
         #controls { 
@@ -28,8 +29,7 @@
             font-size: 35px; color: #333; touch-action: none;
         }
         
-        /* Класс для активной кнопки (подсветка) */
-        .btn.active { background: rgba(255,255,255,0.9); transform: scale(0.9); border-color: #000; }
+        .btn.active { background: rgba(255,255,255,0.95); border-color: #000; transform: scale(0.9); }
 
         #game-over {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -37,20 +37,17 @@
             flex-direction: column; justify-content: center; align-items: center;
             z-index: 20;
         }
-        #restart-btn {
-            padding: 20px 40px; background: #333; color: #fff;
-            border-radius: 10px; font-weight: bold; margin-top: 20px;
-        }
+        #restart-btn { padding: 20px 40px; background: #333; color: #fff; border-radius: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div id="ui">SCORE: <span id="score">0</span></div>
+    <div id="debug"></div>
     <div id="lives">🖤🖤🖤</div>
     
     <div id="game-over">
         <h1>GAME OVER</h1>
-        <p id="final-score">SCORE: 0</p>
         <div id="restart-btn">ИГРАТЬ СНОВА</div>
     </div>
 
@@ -67,76 +64,63 @@
         tg.expand();
 
         let score = 0, lives = 3, isGameOver = false;
-        const keys = { up: false, down: false, left: false, right: false };
+        // Глобальный объект состояния клавиш
+        const input = { up: false, down: false, left: false, right: false };
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xd1d9e0);
-        scene.fog = new THREE.Fog(0xd1d9e0, 20, 100);
-
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // Самолёт
+        // Самолёт (упрощенная меш-структура для стабильности)
         const planeGroup = new THREE.Group();
         const paperMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: 2 });
-        
-        const body = new THREE.Mesh(new THREE.ConeGeometry(0.15, 2, 3), paperMat);
-        body.rotation.x = Math.PI/2; body.rotation.z = Math.PI;
+        const body = new THREE.Mesh(new THREE.ConeGeometry(0.2, 2, 4), paperMat);
+        body.rotation.x = Math.PI/2;
         planeGroup.add(body);
-
-        const wingGeom = new THREE.BufferGeometry();
-        const vertices = new Float32Array([0,0,1, -1.5,0,-1, 1.5,0,-1]);
-        wingGeom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-        const wings = new THREE.Mesh(wingGeom, paperMat);
+        const wings = new THREE.Mesh(new THREE.BoxGeometry(3, 0.05, 1), paperMat);
         planeGroup.add(wings);
         scene.add(planeGroup);
 
         scene.add(new THREE.DirectionalLight(0xffffff, 1));
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-        // Кольца
         const rings = [];
-        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
         for(let i=0; i<7; i++) {
-            const r = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.05, 12, 24), ringMat);
+            const r = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.05, 12, 24), new THREE.MeshStandardMaterial({color: 0xffffff}));
             r.position.set(0, 0, -40 - i*40);
             r.userData = { passed: false };
             scene.add(r);
             rings.push(r);
         }
 
-        // --- УПРАВЛЕНИЕ (УНИВЕРСАЛЬНОЕ) ---
-        const setupBtn = (id, key) => {
+        // --- ФУНКЦИЯ УПРАВЛЕНИЯ ---
+        function bindControl(id, key) {
             const el = document.getElementById(id);
             
-            // Обработка нажатия (палец или мышь)
-            el.addEventListener('pointerdown', (e) => {
+            const press = (e) => {
                 e.preventDefault();
-                if(isGameOver) return;
-                keys[key] = true;
-                el.classList.add('active'); // Подсветка кнопки
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            });
-
-            // Обработка отпускания
-            const stop = (e) => {
+                input[key] = true;
+                el.classList.add('active');
+            };
+            const release = (e) => {
                 e.preventDefault();
-                keys[key] = false;
+                input[key] = false;
                 el.classList.remove('active');
             };
 
-            el.addEventListener('pointerup', stop);
-            el.addEventListener('pointerleave', stop);
-            el.addEventListener('pointercancel', stop);
-        };
+            el.addEventListener('pointerdown', press);
+            el.addEventListener('pointerup', release);
+            el.addEventListener('pointerleave', release);
+            el.addEventListener('pointercancel', release);
+        }
 
-        setupBtn('up', 'up'); setupBtn('down', 'down');
-        setupBtn('left', 'left'); setupBtn('right', 'right');
+        bindControl('up', 'up'); bindControl('down', 'down');
+        bindControl('left', 'left'); bindControl('right', 'right');
 
-        // --- ЛОГИКА ИГРЫ ---
         function resetGame() {
             score = 0; lives = 3; isGameOver = false;
             document.getElementById('score').innerText = "0";
@@ -148,51 +132,59 @@
                 r.userData.passed = false;
             });
         }
-        document.getElementById('restart-btn').addEventListener('pointerdown', resetGame);
+        document.getElementById('restart-btn').addEventListener('click', resetGame);
 
         function animate() {
             requestAnimationFrame(animate);
             if(isGameOver) { renderer.render(scene, camera); return; }
 
-            planeGroup.position.z -= 0.35;
+            // Полет вперед (постоянный)
+            planeGroup.position.z -= 0.4;
 
-            // Движение
-            if(keys.left) planeGroup.position.x -= 0.2;
-            if(keys.right) planeGroup.position.x += 0.2;
-            if(keys.up) planeGroup.position.y += 0.2;
-            if(keys.down) planeGroup.position.y -= 0.2;
+            // Движение самолета по осям
+            const speed = 0.25;
+            if (input.left)  planeGroup.position.x -= speed;
+            if (input.right) planeGroup.position.x += speed;
+            if (input.up)    planeGroup.position.y += speed;
+            if (input.down)  planeGroup.position.y -= speed;
 
-            // Наклоны
-            planeGroup.rotation.z = THREE.MathUtils.lerp(planeGroup.rotation.z, keys.left ? 0.5 : (keys.right ? -0.5 : 0), 0.1);
+            // DEBUG инфо для тебя (удалим потом)
+            document.getElementById('debug').innerText = `L:${input.left} R:${input.right} U:${input.up} D:${input.down}`;
 
-            camera.position.set(planeGroup.position.x, planeGroup.position.y + 1.5, planeGroup.position.z + 7);
+            // Наклон при повороте
+            let targetRot = 0;
+            if (input.left) targetRot = 0.6;
+            if (input.right) targetRot = -0.6;
+            planeGroup.rotation.z = THREE.MathUtils.lerp(planeGroup.rotation.z, targetRot, 0.1);
+
+            // Камера следует за самолетом
+            camera.position.x = planeGroup.position.x;
+            camera.position.y = planeGroup.position.y + 1.5;
+            camera.position.z = planeGroup.position.z + 7;
             camera.lookAt(planeGroup.position.x, planeGroup.position.y, planeGroup.position.z - 5);
 
+            // Кольца и Жизни
             rings.forEach(r => {
                 const dx = planeGroup.position.x - r.position.x;
                 const dy = planeGroup.position.y - r.position.y;
                 const distXY = Math.sqrt(dx*dx + dy*dy);
 
-                // Проверка пролета
                 if(!r.userData.passed && Math.abs(planeGroup.position.z - r.position.z) < 0.6) {
                     if(distXY < 2.5) {
                         score += 10;
                         document.getElementById('score').innerText = score;
                         r.userData.passed = true;
+                        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
                     }
                 }
 
-                // Промах
                 if(r.position.z > planeGroup.position.z + 2) {
                     if(!r.userData.passed) {
                         lives--;
                         document.getElementById('lives').innerText = "🖤".repeat(lives);
-                        paperMat.color.set(0xff0000);
-                        setTimeout(() => paperMat.color.set(0xffffff), 200);
                         if(lives <= 0) {
                             isGameOver = true;
                             document.getElementById('game-over').style.display = 'flex';
-                            document.getElementById('final-score').innerText = "SCORE: " + score;
                         }
                     }
                     r.userData.passed = false;
@@ -204,6 +196,13 @@
 
             renderer.render(scene, camera);
         }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
         animate();
     </script>
 </body>
