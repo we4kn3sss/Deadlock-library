@@ -3,188 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Paperplane Static Joy</title>
+    <title>Origami Flight TWA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background: #d1d9e0; 
-            position: fixed; touch-action: none; font-family: sans-serif;
+        body { 
+            margin: 0; overflow: hidden; background: #d1d9e0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            user-select: none; -webkit-user-select: none; touch-action: none;
+        }
+        
+        #ui { 
+            position: absolute; top: env(safe-area-inset-top, 20px); left: 20px; 
+            color: #444; font-size: 22px; font-weight: 800; z-index: 10;
         }
 
-        /* Полотно игры */
-        #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #lives {
+            position: absolute; top: env(safe-area-inset-top, 20px); right: 20px;
+            font-size: 24px; color: #000; z-index: 10; letter-spacing: 5px;
+        }
 
-        /* Интерфейс */
-        #ui {
+        #controls { 
+            position: absolute; bottom: env(safe-area-inset-bottom, 30px); left: 50%; 
+            transform: translateX(-50%); display: grid; 
+            grid-template-columns: repeat(3, 80px); gap: 15px; z-index: 10;
+        }
+        
+        .btn { 
+            width: 80px; height: 80px; background: rgba(255,255,255,0.4); 
+            border: 1px solid rgba(255,255,255,0.6); border-radius: 20px; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 32px; color: #333; touch-action: none; 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .btn:active { background: rgba(255,255,255,0.8); transform: scale(0.9); }
+
+        #game-over {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10;
+            background: rgba(209, 217, 224, 0.95); display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 20; color: #333;
         }
-        #score-box { position: absolute; top: env(safe-area-inset-top, 20px); left: 20px; font-weight: 900; font-size: 22px; color: #444; }
-        #lives-box { position: absolute; top: env(safe-area-inset-top, 20px); right: 20px; font-size: 22px; }
-
-        /* Зона джойстика — СТАТИЧНАЯ */
-        #joy-zone {
-            position: absolute; bottom: 40px; left: 40px;
-            width: 120px; height: 120px;
-            background: rgba(255,255,255,0.15);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            pointer-events: auto; /* Важно: эта зона ловит касания */
+        #game-over h1 { font-size: 40px; margin-bottom: 10px; }
+        #restart-btn {
+            padding: 15px 40px; background: #333; color: #fff;
+            border-radius: 15px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        #joy-stick {
-            position: absolute; top: 50%; left: 50%;
-            width: 50px; height: 50px;
-            background: #fff;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        #game-over { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(209, 217, 224, 0.98); display: none; 
-            flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 100; pointer-events: auto;
-        }
-        #restart-btn { padding: 15px 40px; background: #333; color: #fff; border-radius: 15px; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="game-canvas"></div>
+    <div id="ui">SCORE: <span id="score">0</span></div>
+    <div id="lives">🖤🖤🖤</div>
+    
+    <div id="game-over">
+        <h1>GAME OVER</h1>
+        <p id="final-score" style="font-size: 20px; margin-bottom: 20px;">SCORE: 0</p>
+        <div id="restart-btn" onclick="resetGame()">ИГРАТЬ СНОВА</div>
+    </div>
 
-    <div id="ui">
-        <div id="score-box">SCORE: <span id="score">0</span></div>
-        <div id="lives-box" id="lives">🖤🖤🖤</div>
-        
-        <div id="joy-zone">
-            <div id="joy-stick"></div>
-        </div>
-
-        <div id="game-over">
-            <h1 style="font-size: 32px;">GAME OVER</h1>
-            <p id="final-score" style="font-size: 20px;">SCORE: 0</p>
-            <div id="restart-btn" onclick="location.reload()">ИГРАТЬ СНОВА</div>
-        </div>
+    <div id="controls">
+        <div></div><div class="btn" id="up">↑</div><div></div>
+        <div class="btn" id="left">←</div><div class="btn" id="down">↓</div><div class="btn" id="right">→</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready(); tg.expand();
+        tg.ready();
+        tg.expand();
 
-        let score = 0, lives = 3, isGameOver = false, speed = 0.22;
-        let input = { x: 0, y: 0 }, vel = { x: 0, y: 0 };
+        let score = 0;
+        let lives = 3;
+        let isGameOver = false;
+        let baseSpeed = 0.22; // Начальная скорость (было 0.35)
         
-        const joyZone = document.getElementById('joy-zone');
-        const joyStick = document.getElementById('joy-stick');
+        // Для плавности управления
+        const keys = { up: false, down: false, left: false, right: false };
+        const vel = { x: 0, y: 0 }; 
+        const friction = 0.92; // Коэффициент торможения (чем ближе к 1, тем плавнее)
+        const accel = 0.015;   // Мощность ускорения
 
-        // --- ГРАФИКА ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xd1d9e0);
-        scene.fog = new THREE.Fog(0xd1d9e0, 20, 90);
+        scene.fog = new THREE.Fog(0xd1d9e0, 15, 95);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        document.getElementById('game-canvas').appendChild(renderer.domElement);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-        const plane = new THREE.Group();
-        const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: 2 });
-        const shape = new THREE.Shape();
-        shape.moveTo(0, 1.2); shape.lineTo(-1.5, -1); shape.lineTo(0, -0.5); shape.lineTo(1.5, -1); shape.lineTo(0, 1.2);
-        const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), mat);
-        mesh.rotation.x = -Math.PI/2;
-        plane.add(mesh);
-        scene.add(plane);
+        const planeGroup = new THREE.Group();
+        const paperMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide, roughness: 0.7 });
 
-        scene.add(new THREE.DirectionalLight(0xffffff, 1).add(new THREE.AmbientLight(0xffffff, 0.6)));
-
-        const rings = [];
-        for(let i=0; i<8; i++) {
-            const r = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.1, 12, 24), new THREE.MeshStandardMaterial({color: 0xffffff}));
-            r.position.set(Math.random()*14-7, Math.random()*10-5, -i*35 - 30);
-            scene.add(r); rings.push(r);
+        function createShape(pts) {
+            const s = new THREE.Shape();
+            s.moveTo(pts.x, pts.y);
+            for(let i=1; i<pts.length; i++) s.lineTo(pts[i].x, pts[i].y);
+            return new THREE.Mesh(new THREE.ShapeGeometry(s), paperMat);
         }
 
-        // --- УПРАВЛЕНИЕ (СТАТИЧНОЕ) ---
-        joyZone.addEventListener('touchstart', (e) => { e.preventDefault(); }, {passive: false});
-        joyZone.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches;
-            const rect = joyZone.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            
-            let dx = touch.clientX - centerX;
-            let dy = touch.clientY - centerY;
-            const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60);
-            const angle = Math.atan2(dy, dx);
+        const keel = new THREE.Mesh(new THREE.ConeGeometry(0.12, 2.2, 3), paperMat);
+        keel.rotation.x = Math.PI / 2; keel.rotation.z = Math.PI;
+        keel.position.y = -0.15; keel.scale.set(0.3, 1, 1);
+        planeGroup.add(keel);
 
-            const lx = Math.cos(angle) * dist;
-            const ly = Math.sin(angle) * dist;
+        const leftWing = createShape([{x:0,y:1.1}, {x:-1.3,y:-1}, {x:-0.2,y:-0.7}, {x:0,y:-0.5}]);
+        leftWing.rotation.x = -Math.PI / 2; leftWing.rotation.y = -0.08;
+        planeGroup.add(leftWing);
 
-            joyStick.style.transform = `translate(calc(-50% + ${lx}px), calc(-50% + ${ly}px))`;
-            
-            input.x = lx / 60;
-            input.y = -(ly / 60);
-        }, {passive: false});
+        const rightWing = createShape([{x:0,y:1.1}, {x:1.3,y:-1}, {x:0.2,y:-0.7}, {x:0,y:-0.5}]);
+        rightWing.rotation.x = -Math.PI / 2; rightWing.rotation.y = 0.08;
+        planeGroup.add(rightWing);
 
-        joyZone.addEventListener('touchend', () => {
-            joyStick.style.transform = `translate(-50%, -50%)`;
-            input.x = 0; input.y = 0;
-        });
+        scene.add(planeGroup);
 
-        // --- ЦИКЛ ИГРЫ ---
+        const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+        sun.position.set(5, 10, 5);
+        scene.add(sun);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+        const rings = [];
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x999999 });
+        function spawnRing(z) {
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.06, 12, 32), ringMat);
+            ring.userData = { passed: false };
+            ring.position.set(Math.random()*16-8, Math.random()*10-5, z);
+            scene.add(ring);
+            rings.push(ring);
+        }
+        for(let i=1; i<=7; i++) spawnRing(-i * 40);
+
+        const setupControl = (id, key) => {
+            const el = document.getElementById(id);
+            const start = (e) => { e.preventDefault(); if(!isGameOver) keys[key] = true; };
+            const stop = (e) => { e.preventDefault(); keys[key] = false; };
+            el.addEventListener('touchstart', start, {passive: false});
+            el.addEventListener('touchend', stop, {passive: false});
+            el.addEventListener('mousedown', start);
+            el.addEventListener('mouseup', stop);
+            el.addEventListener('mouseleave', stop);
+        };
+        ['up','down','left','right'].forEach(k => setupControl(k, k));
+
+        function updateLivesDisplay() {
+            document.getElementById('lives').innerText = "🖤".repeat(lives);
+        }
+
+        function takeDamage() {
+            lives--;
+            updateLivesDisplay();
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            paperMat.color.set(0xff0000);
+            setTimeout(() => paperMat.color.set(0xffffff), 200);
+            if (lives <= 0) gameOver();
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            for(let k in keys) keys[k] = false;
+            document.getElementById('game-over').style.display = 'flex';
+            document.getElementById('final-score').innerText = "SCORE: " + score;
+        }
+
+        function resetGame() {
+            score = 0; lives = 3; isGameOver = false; baseSpeed = 0.22;
+            vel.x = 0; vel.y = 0;
+            document.getElementById('score').innerText = score;
+            updateLivesDisplay();
+            document.getElementById('game-over').style.display = 'none';
+            planeGroup.position.set(0,0,0);
+            rings.forEach((r, i) => {
+                r.userData.passed = false;
+                r.position.set(Math.random()*16-8, Math.random()*10-5, -(i+1)*40);
+            });
+        }
+
         function animate() {
-            if (isGameOver) return;
             requestAnimationFrame(animate);
+            if (isGameOver) { renderer.render(scene, camera); return; }
 
-            plane.position.z -= speed;
-            vel.x = (vel.x + input.x * 0.05) * 0.9;
-            vel.y = (vel.y + input.y * 0.05) * 0.9;
-            plane.position.x += vel.x;
-            plane.position.y += vel.y;
+            // Постоянное движение вперед
+            planeGroup.position.z -= baseSpeed;
 
-            plane.rotation.z = -vel.x * 5;
-            plane.rotation.x = vel.y * 3;
+            // Плавное управление через физику (velocity)
+            if (keys.left) vel.x -= accel;
+            if (keys.right) vel.x += accel;
+            if (keys.up) vel.y += accel;
+            if (keys.down) vel.y -= accel;
 
-            camera.position.set(plane.position.x * 0.5, plane.position.y * 0.5 + 1.5, plane.position.z + 7);
-            camera.lookAt(plane.position.x, plane.position.y, plane.position.z - 5);
+            // Применяем трение
+            vel.x *= friction;
+            vel.y *= friction;
+
+            planeGroup.position.x += vel.x;
+            planeGroup.position.y += vel.y;
+
+            // Наклоны зависят от текущей скорости
+            planeGroup.rotation.z = THREE.MathUtils.lerp(planeGroup.rotation.z, -vel.x * 10, 0.1);
+            planeGroup.rotation.x = THREE.MathUtils.lerp(planeGroup.rotation.x, vel.y * 5, 0.1);
+
+            camera.position.set(
+                THREE.MathUtils.lerp(camera.position.x, planeGroup.position.x, 0.08),
+                THREE.MathUtils.lerp(camera.position.y, planeGroup.position.y + 1, 0.08),
+                planeGroup.position.z + 6
+            );
+            camera.lookAt(planeGroup.position.x, planeGroup.position.y, planeGroup.position.z - 4);
 
             rings.forEach(r => {
-                if (Math.abs(r.position.z - plane.position.z) < 0.5) {
-                    const d = Math.sqrt((plane.position.x - r.position.x)**2 + (plane.position.y - r.position.y)**2);
-                    if (d < 3) {
+                const dx = planeGroup.position.x - r.position.x;
+                const dy = planeGroup.position.y - r.position.y;
+                const distanceXY = Math.sqrt(dx * dx + dy * dy);
+
+                if (!r.userData.passed && Math.abs(planeGroup.position.z - r.position.z) < 0.6) {
+                    if (distanceXY < 2.5) {
                         score += 10;
                         document.getElementById('score').innerText = score;
-                        r.position.z -= 280;
-                        tg.HapticFeedback.impactOccurred('light');
+                        r.userData.passed = true;
+                        
+                        // Каждые 100 очков ускоряем на 15%
+                        if (score > 0 && score % 100 === 0) {
+                            baseSpeed *= 1.15;
+                            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                        } else {
+                            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                        }
                     }
                 }
-                if (r.position.z > plane.position.z + 5) {
+                
+                if (r.position.z > planeGroup.position.z + 2) {
+                    if (!r.userData.passed) takeDamage();
+                    r.userData.passed = false;
                     r.position.z -= 280;
-                    r.position.x = Math.random()*14-7; r.position.y = Math.random()*10-5;
+                    r.position.x = Math.random()*16-8;
+                    r.position.y = Math.random()*10-5;
                 }
             });
 
             renderer.render(scene, camera);
         }
 
-        // Запуск через секунду, чтобы всё прогрузилось
-        setTimeout(() => {
-            animate();
-        }, 500);
-
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        animate();
     </script>
 </body>
 </html>
