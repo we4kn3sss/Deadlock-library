@@ -78,13 +78,12 @@
         let score = 0;
         let lives = 3;
         let isGameOver = false;
-        let baseSpeed = 0.22; // Начальная скорость (было 0.35)
+        let baseSpeed = 0.22; 
         
-        // Для плавности управления
         const keys = { up: false, down: false, left: false, right: false };
         const vel = { x: 0, y: 0 }; 
-        const friction = 0.92; // Коэффициент торможения (чем ближе к 1, тем плавнее)
-        const accel = 0.015;   // Мощность ускорения
+        const friction = 0.92; 
+        const accel = 0.015;   
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xd1d9e0);
@@ -137,6 +136,7 @@
         }
         for(let i=1; i<=7; i++) spawnRing(-i * 40);
 
+        // --- УПРАВЛЕНИЕ МЫШЬЮ/ТАЧЕМ ---
         const setupControl = (id, key) => {
             const el = document.getElementById(id);
             const start = (e) => { e.preventDefault(); if(!isGameOver) keys[key] = true; };
@@ -148,6 +148,26 @@
             el.addEventListener('mouseleave', stop);
         };
         ['up','down','left','right'].forEach(k => setupControl(k, k));
+
+        // --- НОВОЕ: УПРАВЛЕНИЕ КЛАВИАТУРОЙ ---
+        window.addEventListener('keydown', (e) => {
+            if (isGameOver) return;
+            switch(e.code) {
+                case 'ArrowUp':    case 'KeyW': keys.up = true; break;
+                case 'ArrowDown':  case 'KeyS': keys.down = true; break;
+                case 'ArrowLeft':  case 'KeyA': keys.left = true; break;
+                case 'ArrowRight': case 'KeyD': keys.right = true; break;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'ArrowUp':    case 'KeyW': keys.up = false; break;
+                case 'ArrowDown':  case 'KeyS': keys.down = false; break;
+                case 'ArrowLeft':  case 'KeyA': keys.left = false; break;
+                case 'ArrowRight': case 'KeyD': keys.right = false; break;
+            }
+        });
 
         function updateLivesDisplay() {
             document.getElementById('lives').innerText = "🖤".repeat(lives);
@@ -186,23 +206,19 @@
             requestAnimationFrame(animate);
             if (isGameOver) { renderer.render(scene, camera); return; }
 
-            // Постоянное движение вперед
             planeGroup.position.z -= baseSpeed;
 
-            // Плавное управление через физику (velocity)
             if (keys.left) vel.x -= accel;
             if (keys.right) vel.x += accel;
             if (keys.up) vel.y += accel;
             if (keys.down) vel.y -= accel;
 
-            // Применяем трение
             vel.x *= friction;
             vel.y *= friction;
 
             planeGroup.position.x += vel.x;
             planeGroup.position.y += vel.y;
 
-            // Наклоны зависят от текущей скорости
             planeGroup.rotation.z = THREE.MathUtils.lerp(planeGroup.rotation.z, -vel.x * 10, 0.1);
             planeGroup.rotation.x = THREE.MathUtils.lerp(planeGroup.rotation.x, vel.y * 5, 0.1);
 
@@ -223,8 +239,6 @@
                         score += 10;
                         document.getElementById('score').innerText = score;
                         r.userData.passed = true;
-                        
-                        // Каждые 100 очков ускоряем на 15%
                         if (score > 0 && score % 100 === 0) {
                             baseSpeed *= 1.15;
                             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
