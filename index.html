@@ -11,22 +11,22 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- FontAwesome для иконок -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts: Cormorant Garamond (винтажные заголовки) и Inter (читаемый текст) -->
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Cormorant Garamond & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        noirBg: '#0a0a09',       // Глубокий темный фон
-                        noirCard: '#161513',     // Темно-серо-коричневый для карточек
-                        parchment: '#e6dcc6',    // Бледный пергамент для текста и акцентов
-                        parchmentMuted: '#8c8577',// Приглушенный пергамент
-                        accentDark: '#2a2825'    // Темный акцент для бордеров
+                        noirBg: '#0a0a09',       
+                        noirCard: '#161513',     
+                        parchment: '#e6dcc6',    
+                        parchmentMuted: '#8c8577',
+                        accentDark: '#3a352d'    
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -45,66 +45,34 @@
             -webkit-user-select: none;
             user-select: none;
             overflow: hidden;
-            /* Легкий паттерн шума/старой бумаги на фоне для атмосферы */
+            /* Шум для эффекта старой бумаги */
             background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.03"/%3E%3C/svg%3E');
         }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0a0a09; }
-        ::-webkit-scrollbar-thumb { background: #2a2825; border-radius: 0px; }
+        ::-webkit-scrollbar { width: 0px; display: none; }
 
-        /* Элегантные винтажные стили */
-        .occult-title {
-            font-family: '"Cormorant Garamond"', serif;
-            letter-spacing: 0.05em;
-        }
+        .occult-title { font-family: '"Cormorant Garamond"', serif; }
 
         .vintage-border {
-            border: 1px solid rgba(230, 220, 198, 0.15);
+            border: 1px solid #3a352d;
             transition: border-color 0.3s ease;
         }
-        
-        .vintage-border:hover {
-            border-color: rgba(230, 220, 198, 0.4);
-        }
 
-        /* Декоративная линия */
-        .vintage-divider {
-            display: flex;
-            align-items: center;
+        /* Выпадающий список стилизация */
+        select.vintage-select {
+            appearance: none;
+            background-color: #161513;
+            border: 1px solid #3a352d;
+            color: #e6dcc6;
+            padding: 8px;
+            font-family: '"Cormorant Garamond"', serif;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
             text-align: center;
-            color: rgba(230, 220, 198, 0.3);
-            margin: 1rem 0;
-        }
-        .vintage-divider::before, .vintage-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(230, 220, 198, 0.15);
-        }
-        .vintage-divider:not(:empty)::before { margin-right: .5em; }
-        .vintage-divider:not(:empty)::after { margin-left: .5em; }
-
-        /* Вкладки */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        .tab-content.active { display: block; }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Эффект старого фото для аватарок героев */
-        .vintage-photo {
-            filter: grayscale(60%) sepia(30%) contrast(110%);
-            border-bottom: 1px solid rgba(230, 220, 198, 0.15);
-        }
-
-        /* =========================================
-           НАВИГАЦИЯ (МЕХАНИКА ВЫЕЗДА)
-           ========================================= */
+        /* Навигация (Анимации выезда) */
         .nav-wrapper {
             position: fixed;
             bottom: 24px;
@@ -114,33 +82,41 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 50;
+            z-index: 40;
             pointer-events: none;
         }
 
-        /* Центральный логотип (Библиотека) */
         .main-nav-btn {
             position: relative;
-            z-index: 60;
+            z-index: 50;
             width: 64px;
             height: 64px;
             background-color: #161513;
+            /* Здесь указана твоя картинка */
             background-image: url('./58401.jpg');
             background-size: cover;
             background-position: center;
-            border: 1px solid #e6dcc6;
+            border: 1px solid #3a352d;
             border-radius: 50%;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
             pointer-events: auto;
             outline: none;
-            cursor: pointer;
         }
         
-        .main-nav-btn.active {
-            transform: rotate(360deg);
+        /* Запасной вариант, если картинки еще нет */
+        .main-nav-btn::after {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(230, 220, 198, 0.2);
+            border-radius: 50%;
         }
 
-        /* Выезжающие кнопки меню */
+        .main-nav-btn.active {
+            transform: rotate(360deg);
+            border-color: #e6dcc6;
+        }
+
         .nav-item {
             position: absolute;
             top: 50%;
@@ -148,7 +124,7 @@
             width: 44px;
             height: 44px;
             background: #161513;
-            border: 1px solid rgba(230, 220, 198, 0.3);
+            border: 1px solid #3a352d;
             border-radius: 50%;
             color: #8c8577;
             display: flex;
@@ -159,127 +135,210 @@
             opacity: 0;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: auto;
-            z-index: 55;
-            cursor: pointer;
+            z-index: 45;
         }
 
         .nav-item.selected {
             color: #e6dcc6;
             border-color: #e6dcc6;
-            background: #2a2825;
         }
 
-        /* Позиции при выезде */
-        .nav-expanded .nav-item[data-target="meta"] {
-            transform: translate(calc(-50% - 130px), -50%) scale(1);
-            opacity: 1;
-        }
-        .nav-expanded .nav-item[data-target="heroes"] {
-            transform: translate(calc(-50% - 70px), -50%) scale(1);
-            opacity: 1;
-        }
-        .nav-expanded .nav-item[data-target="items"] {
-            transform: translate(calc(-50% + 70px), -50%) scale(1);
-            opacity: 1;
-        }
-        .nav-expanded .nav-item[data-target="patches"] {
-            transform: translate(calc(-50% + 130px), -50%) scale(1);
-            opacity: 1;
-        }
+        .nav-expanded .nav-item[data-target="meta"] { transform: translate(calc(-50% - 120px), -50%) scale(1); opacity: 1; }
+        .nav-expanded .nav-item[data-target="heroes"] { transform: translate(calc(-50% - 60px), -50%) scale(1); opacity: 1; }
+        .nav-expanded .nav-item[data-target="items"] { transform: translate(calc(-50% + 60px), -50%) scale(1); opacity: 1; }
+        .nav-expanded .nav-item[data-target="patches"] { transform: translate(calc(-50% + 120px), -50%) scale(1); opacity: 1; }
 
-        /* Метки над кнопками */
-        .nav-label {
+        /* Вкладки */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+        
+        /* Досье Героя */
+        #hero-detail-view {
+            display: none;
             position: absolute;
-            top: -24px;
-            font-size: 11px;
-            font-family: '"Cormorant Garamond"', serif;
-            letter-spacing: 0.05em;
-            color: #e6dcc6;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #0a0a09;
+            z-index: 30;
+            padding: 20px;
+            overflow-y: auto;
+            padding-bottom: 100px; /* Отступ для меню */
+        }
+        #hero-detail-view.active {
+            display: block;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Модальные окна */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(10, 10, 9, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
             opacity: 0;
             transition: opacity 0.3s ease;
-            pointer-events: none;
-            white-space: nowrap;
         }
-        .nav-expanded .nav-item .nav-label {
+        .modal-overlay.active {
+            display: flex;
             opacity: 1;
-            transition-delay: 0.1s;
         }
+        .modal-box {
+            background: #161513;
+            border: 1px solid #e6dcc6;
+            width: 85%;
+            max-width: 320px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Спецэффект для выбранной способности */
+        .ability-btn { transition: all 0.2s; }
+        .ability-btn.active { border-color: #e6dcc6; background: rgba(230, 220, 198, 0.1); }
     </style>
 </head>
 <body class="flex flex-col h-screen">
 
-    <!-- Заголовок -->
-    <header class="bg-noirBg pt-6 pb-4 px-4 flex flex-col items-center justify-center z-10 shrink-0 border-b border-white/5 relative">
-        <h1 class="text-parchment occult-title text-3xl font-semibold">Deadlock Library</h1>
-        <div class="vintage-divider w-32 mt-2 mb-0"><i class="fa-solid fa-diamond text-[6px]"></i></div>
-        <div id="user-info" class="absolute top-4 right-4 text-[10px] text-parchmentMuted uppercase tracking-widest font-sans"></div>
+    <!-- Хедер -->
+    <header class="pt-6 pb-4 px-4 text-center z-10 shrink-0 border-b border-accentDark">
+        <h1 class="text-parchment occult-title text-2xl font-semibold tracking-wide">Archive Records</h1>
     </header>
 
     <!-- Основной контент -->
     <main class="flex-1 overflow-y-auto pb-32 px-4 pt-6" id="main-content">
         
-        <!-- Вкладка: META -->
-        <section id="tab-meta" class="tab-content active space-y-8">
-            <!-- Заполняется JS -->
+        <!-- Вкладка: META (Заглушка) -->
+        <section id="tab-meta" class="tab-content active text-center text-parchmentMuted font-serif italic mt-10">
+            [Meta Data currently unavailable...]
         </section>
 
-        <!-- Вкладка: HEROES -->
-        <section id="tab-heroes" class="tab-content space-y-5">
-            <div class="relative">
-                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-parchmentMuted text-sm"></i>
-                <input type="text" id="hero-search" placeholder="Search the archives..." class="w-full bg-noirCard vintage-border rounded-none pl-9 pr-4 py-2.5 text-parchment placeholder-parchmentMuted focus:outline-none focus:border-parchment font-serif text-lg transition-colors">
-            </div>
-            <div id="heroes-grid" class="grid grid-cols-2 gap-4">
-                <!-- Заполняется JS -->
+        <!-- Вкладка: HEROES (Сетка) -->
+        <section id="tab-heroes" class="tab-content">
+            <h2 class="text-xl occult-title text-parchment mb-4 border-b border-accentDark pb-2">Persons of Interest</h2>
+            <div id="heroes-grid" class="grid grid-cols-3 gap-3">
+                <!-- Сетка генерируется в JS -->
             </div>
         </section>
 
-        <!-- Вкладка: ITEMS -->
-        <section id="tab-items" class="tab-content space-y-6">
-            <!-- Заполняется JS -->
+        <!-- Вкладка: ITEMS (Заглушка) -->
+        <section id="tab-items" class="tab-content text-center text-parchmentMuted font-serif italic mt-10">
+            [Armory Archives sealed...]
         </section>
 
-        <!-- Вкладка: PATCHES -->
-        <section id="tab-patches" class="tab-content space-y-6">
-            <div class="text-center mb-6">
-                <h2 class="text-2xl occult-title text-parchment">Archive Records</h2>
-                <p class="text-xs text-parchmentMuted mt-1">Recent adjustments and findings</p>
-            </div>
-            <div id="patches-list" class="space-y-6 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px before:h-full before:w-[1px] before:bg-accentDark">
-                <!-- Заполняется JS -->
-            </div>
+        <!-- Вкладка: PATCHES (Заглушка) -->
+        <section id="tab-patches" class="tab-content text-center text-parchmentMuted font-serif italic mt-10">
+            [Awaiting new manifests...]
         </section>
-
     </main>
 
-    <!-- Выезжающее меню -->
-    <div class="nav-wrapper" id="nav-container">
-        
-        <button class="nav-item selected" data-target="meta" onclick="selectTab('meta')">
-            <span class="nav-label">Meta</span>
-            <i class="fa-solid fa-chart-line"></i>
-        </button>
-        
-        <button class="nav-item" data-target="heroes" onclick="selectTab('heroes')">
-            <span class="nav-label">Roster</span>
-            <i class="fa-solid fa-users-viewfinder"></i>
-        </button>
-        
-        <button class="nav-item" data-target="items" onclick="selectTab('items')">
-            <span class="nav-label">Armory</span>
-            <i class="fa-solid fa-box-open"></i>
-        </button>
-        
-        <button class="nav-item" data-target="patches" onclick="selectTab('patches')">
-            <span class="nav-label">Records</span>
-            <i class="fa-solid fa-scroll"></i>
-        </button>
+    <!-- ДОСЬЕ ГЕРОЯ (Hero Detail View) -->
+    <div id="hero-detail-view">
+        <!-- Шапка досье -->
+        <div class="flex items-center gap-4 mb-6">
+            <button onclick="closeHeroDetail()" class="text-parchmentMuted hover:text-parchment text-xl">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h2 id="hd-name" class="text-3xl occult-title text-parchment font-semibold tracking-wider uppercase"></h2>
+        </div>
 
-        <!-- Центральная кнопка с логотипом -->
+        <!-- Центральный блок: Статы | Фото | Кнопки П/Л -->
+        <div class="flex justify-between items-stretch gap-3 mb-6">
+            
+            <!-- Левая колонка: Статы -->
+            <div class="w-1/3 flex flex-col justify-between">
+                <div class="vintage-border bg-noirCard">
+                    <select id="hd-rank-select" class="vintage-select" onchange="updateStats()">
+                        <option value="low">Лоу ранги</option>
+                        <option value="mid" selected>Средние</option>
+                        <option value="high">Этернус</option>
+                    </select>
+                </div>
+                <div class="vintage-border bg-noirCard mt-2 p-2 flex flex-col gap-2 flex-grow justify-center text-center">
+                    <div>
+                        <div class="text-[10px] text-parchmentMuted uppercase font-sans tracking-widest">ПР</div>
+                        <div id="hd-pr" class="text-lg text-parchment font-serif font-bold">--%</div>
+                    </div>
+                    <div class="w-8 border-t border-accentDark mx-auto"></div>
+                    <div>
+                        <div class="text-[10px] text-parchmentMuted uppercase font-sans tracking-widest">ВР</div>
+                        <div id="hd-vr" class="text-lg text-parchment font-serif font-bold">--%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Центральная колонка: Фото персонажа (пока заглушка) -->
+            <div class="flex-1 vintage-border bg-noirCard flex items-center justify-center relative min-h-[200px]">
+                <i class="fa-solid fa-user text-4xl text-accentDark"></i>
+                <div class="absolute inset-0 border border-parchment/5 m-1"></div>
+            </div>
+
+            <!-- Правая колонка: Кнопки П и Л -->
+            <div class="w-1/6 flex flex-col gap-3 justify-center">
+                <button onclick="openModal('items')" class="vintage-border bg-noirCard aspect-square flex items-center justify-center text-parchment font-serif text-xl hover:border-parchment transition-colors">
+                    П
+                </button>
+                <button onclick="openModal('lore')" class="vintage-border bg-noirCard aspect-square flex items-center justify-center text-parchment font-serif text-xl hover:border-parchment transition-colors">
+                    Л
+                </button>
+            </div>
+        </div>
+
+        <!-- Нижний блок: Способности -->
+        <div class="mt-4">
+            <h3 class="text-sm occult-title text-parchmentMuted mb-2 tracking-widest uppercase">Abilities</h3>
+            <!-- 4 квадратика -->
+            <div id="hd-abilities-row" class="grid grid-cols-4 gap-2 mb-4">
+                <!-- Генерируется JS -->
+            </div>
+
+            <!-- Детальная информация по выбранной способности -->
+            <div id="hd-ability-detail" class="vintage-border bg-noirCard p-3 flex gap-4 hidden">
+                <!-- Слева квадрат способности -->
+                <div id="hd-ab-icon" class="w-14 h-14 shrink-0 vintage-border bg-noirBg flex items-center justify-center text-xl text-parchment">
+                </div>
+                <!-- Справа текст -->
+                <div class="flex-1">
+                    <h4 id="hd-ab-name" class="font-serif text-parchment text-lg leading-none mb-1"></h4>
+                    <p id="hd-ab-desc" class="text-xs text-parchmentMuted font-sans mb-2"></p>
+                    <div id="hd-ab-upgrades" class="text-[10px] font-sans text-parchment space-y-1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна (Предметы и Лор) -->
+    <div id="custom-modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-accentDark pb-2">
+                <h3 id="modal-title" class="text-xl occult-title text-parchment"></h3>
+                <button onclick="closeModal(true)" class="text-parchmentMuted hover:text-parchment"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-content" class="text-sm text-parchmentMuted font-sans leading-relaxed">
+                <!-- Контент -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Навигация снизу -->
+    <div class="nav-wrapper" id="nav-container">
+        <button class="nav-item" data-target="meta" onclick="selectTab('meta')"><i class="fa-solid fa-chart-line"></i></button>
+        <button class="nav-item selected" data-target="heroes" onclick="selectTab('heroes')"><i class="fa-solid fa-users"></i></button>
+        <button class="nav-item" data-target="items" onclick="selectTab('items')"><i class="fa-solid fa-box"></i></button>
+        <button class="nav-item" data-target="patches" onclick="selectTab('patches')"><i class="fa-solid fa-scroll"></i></button>
+
+        <!-- Центральная кнопка (Лого) -->
         <button class="main-nav-btn" id="center-logo" onclick="toggleNav()"></button>
     </div>
 
-    <!-- Скрипты -->
     <script>
         // Инициализация Telegram
         const tg = window.Telegram.WebApp;
@@ -288,26 +347,74 @@
         tg.setHeaderColor('#0a0a09');
         tg.setBackgroundColor('#0a0a09');
 
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-info').innerText = `Investigator: ${tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name}`;
-        }
+        // --- БАЗА ДАННЫХ (Mock Data) ---
+        const db = {
+            "abrams": {
+                name: "Abrams",
+                stats: {
+                    low: { pr: "18.5%", vr: "48.2%" },
+                    mid: { pr: "15.0%", vr: "51.1%" },
+                    high: { pr: "12.3%", vr: "54.5%" }
+                },
+                lore: "A hardened detective with a demonic arm. He prefers to ask questions with his fists and read the answers in blood.",
+                items: "Core: Colossus, Siphon Bullets.<br>Situational: Silence Glyph.",
+                abilities: [
+                    { name: "Siphon Life", desc: "Drains vitality from nearby enemies.", upgrades: ["+Radius", "+Damage", "-Cooldown"] },
+                    { name: "Shoulder Charge", desc: "Charge forward, pinning an enemy to a wall.", upgrades: ["+Distance", "+Stun Duration", "+Damage"] },
+                    { name: "Infernal Resilience", desc: "Passive health regeneration.", upgrades: ["+Regen", "+Armor", "Status Resist"] },
+                    { name: "Seismic Smash", desc: "Leap into the air and slam the ground.", upgrades: ["+Radius", "+Damage", "Execute low HP"] }
+                ]
+            },
+            "vindicta": {
+                name: "Vindicta",
+                stats: {
+                    low: { pr: "22.1%", vr: "46.5%" },
+                    mid: { pr: "18.4%", vr: "49.8%" },
+                    high: { pr: "25.2%", vr: "52.0%" }
+                },
+                lore: "An undead sniper fueled by vengeance. She takes to the skies to deliver fatal judgments from afar.",
+                items: "Core: High-Velocity Mag, Glass Cannon.<br>Situational: Headhunter.",
+                abilities: [
+                    { name: "Stake", desc: "Pins an enemy to their current location.", upgrades: ["+Duration", "+Damage", "Disarm"] },
+                    { name: "Flight", desc: "Take to the skies for unmatched aerial advantage.", upgrades: ["+Duration", "+Move Speed", "+Weapon Damage"] },
+                    { name: "Crow Familiar", desc: "Send a crow to deal damage and reveal.", upgrades: ["+Damage", "+Reveal Duration", "Apply Bleed"] },
+                    { name: "Assassinate", desc: "Use a scoped rifle to execute enemies.", upgrades: ["+Zoom", "+Damage", "Refund on kill"] }
+                ]
+            },
+            "seven": {
+                name: "Seven",
+                stats: {
+                    low: { pr: "30.5%", vr: "54.1%" },
+                    mid: { pr: "25.0%", vr: "52.3%" },
+                    high: { pr: "15.1%", vr: "48.9%" }
+                },
+                lore: "A former prisoner of a lightning demon, Seven now commands the storm itself.",
+                items: "Core: Spirit Power, Mystic Reach.<br>Situational: Refresher.",
+                abilities: [
+                    { name: "Lightning Ball", desc: "Fires a ball of lightning.", upgrades: ["+Radius", "+Speed", "+Damage"] },
+                    { name: "Static Charge", desc: "Stuns enemies after a delay.", upgrades: ["+Radius", "-Delay", "+Stun Duration"] },
+                    { name: "Power Surge", desc: "Attacks chain lightning to other targets.", upgrades: ["+Bounces", "+Damage", "Slow"] },
+                    { name: "Storm Cloud", desc: "Massive AoE continuous damage.", upgrades: ["+Radius", "+Damage", "+Duration"] }
+                ]
+            }
+        };
 
-        // ==========================================
-        // НАВИГАЦИЯ
-        // ==========================================
+        // Текущее состояние
+        let currentHeroId = null;
+
+        // --- НАВИГАЦИЯ ---
         let isNavOpen = false;
-        const navContainer = document.getElementById('nav-container');
-        const centerLogo = document.getElementById('center-logo');
-
         function toggleNav() {
             isNavOpen = !isNavOpen;
+            const container = document.getElementById('nav-container');
+            const logo = document.getElementById('center-logo');
             if (isNavOpen) {
-                navContainer.classList.add('nav-expanded');
-                centerLogo.classList.add('active');
+                container.classList.add('nav-expanded');
+                logo.classList.add('active');
                 if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             } else {
-                navContainer.classList.remove('nav-expanded');
-                centerLogo.classList.remove('active');
+                container.classList.remove('nav-expanded');
+                logo.classList.remove('active');
             }
         }
 
@@ -319,166 +426,118 @@
                 if(btn.dataset.target === tabId) btn.classList.add('selected');
                 else btn.classList.remove('selected');
             });
-
-            document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Если ушли с вкладки героев, закроем досье
+            if(tabId !== 'heroes') closeHeroDetail();
+            
             toggleNav();
         }
 
-        document.getElementById('main-content').addEventListener('click', () => {
-            if (isNavOpen) toggleNav();
+        // --- СЕТКА ГЕРОЕВ ---
+        function renderHeroesGrid() {
+            const grid = document.getElementById('heroes-grid');
+            grid.innerHTML = Object.keys(db).map(key => `
+                <div onclick="openHeroDetail('${key}')" class="bg-noirCard vintage-border aspect-square flex items-center justify-center cursor-pointer hover:border-parchment transition-colors p-2 text-center group">
+                    <span class="font-serif text-parchment text-sm group-hover:scale-110 transition-transform">${db[key].name}</span>
+                </div>
+            `).join('');
+        }
+
+        // --- ДОСЬЕ ГЕРОЯ ---
+        function openHeroDetail(heroId) {
+            currentHeroId = heroId;
+            const hero = db[heroId];
+            
+            // Заполняем данные
+            document.getElementById('hd-name').innerText = hero.name;
+            document.getElementById('hd-rank-select').value = 'mid'; // По умолчанию
+            updateStats();
+
+            // Рендер кнопок способностей
+            const abRow = document.getElementById('hd-abilities-row');
+            abRow.innerHTML = hero.abilities.map((ab, index) => `
+                <button onclick="selectAbility(${index})" id="ab-btn-${index}" class="ability-btn vintage-border bg-noirCard aspect-square flex items-center justify-center text-parchment font-serif">
+                    ${index + 1}
+                </button>
+            `).join('');
+
+            // Скрываем детальную панель абилки
+            document.getElementById('hd-ability-detail').classList.add('hidden');
+
+            // Показываем вьюху
+            document.getElementById('main-content').style.display = 'none';
+            const detailView = document.getElementById('hero-detail-view');
+            detailView.classList.add('active');
+            window.scrollTo(0, 0);
+
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function closeHeroDetail() {
+            document.getElementById('hero-detail-view').classList.remove('active');
+            document.getElementById('main-content').style.display = 'block';
+            currentHeroId = null;
+        }
+
+        function updateStats() {
+            if(!currentHeroId) return;
+            const rank = document.getElementById('hd-rank-select').value;
+            const stats = db[currentHeroId].stats[rank];
+            document.getElementById('hd-pr').innerText = stats.pr;
+            document.getElementById('hd-vr').innerText = stats.vr;
+        }
+
+        // --- СПОСОБНОСТИ ---
+        function selectAbility(index) {
+            if(!currentHeroId) return;
+            const ab = db[currentHeroId].abilities[index];
+            
+            // Визуальное выделение кнопки
+            document.querySelectorAll('.ability-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`ab-btn-${index}`).classList.add('active');
+
+            // Заполнение нижней панели
+            const panel = document.getElementById('hd-ability-detail');
+            document.getElementById('hd-ab-icon').innerText = index + 1;
+            document.getElementById('hd-ab-name').innerText = ab.name;
+            document.getElementById('hd-ab-desc').innerText = ab.desc;
+            
+            document.getElementById('hd-ab-upgrades').innerHTML = ab.upgrades.map((upg, i) => `
+                <div class="flex items-center gap-2">
+                    <span class="text-accentDark border border-accentDark rounded-full w-3 h-3 flex items-center justify-center leading-none">+</span>
+                    <span>${upg}</span>
+                </div>
+            `).join('');
+
+            panel.classList.remove('hidden');
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
+        // --- МОДАЛЬНЫЕ ОКНА (П и Л) ---
+        function openModal(type) {
+            if(!currentHeroId) return;
+            const hero = db[currentHeroId];
+            
+            document.getElementById('modal-title').innerText = type === 'items' ? 'Requisitioned Items' : 'Archive Lore';
+            document.getElementById('modal-content').innerHTML = type === 'items' ? hero.items : hero.lore;
+            
+            document.getElementById('custom-modal').classList.add('active');
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function closeModal(force = false, event = null) {
+            if (event && event.target !== document.getElementById('custom-modal') && !force) return;
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+
+        // Инициализация при старте
+        renderHeroesGrid();
+        // Включаем вкладку героев по умолчанию
+        selectTab('heroes');
+        // Закрываем меню при клике вне него
+        document.body.addEventListener('click', (e) => {
+            if (isNavOpen && !e.target.closest('#nav-container') && !e.target.closest('.main-nav-btn')) toggleNav();
         });
-
-
-        // ==========================================
-        // ДАННЫЕ (MOCK DATA)
-        // ==========================================
-
-        const heroesData = [
-            { id: 'seven', name: 'Seven', role: 'Carry', winrate: '54.2%', pickrate: '18.5%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Seven' },
-            { id: 'vindicta', name: 'Vindicta', role: 'Sniper', winrate: '51.8%', pickrate: '15.2%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Vindicta' },
-            { id: 'abrams', name: 'Abrams', role: 'Bruiser', winrate: '53.1%', pickrate: '14.8%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Abrams' },
-            { id: 'dynamo', name: 'Dynamo', role: 'Support', winrate: '49.5%', pickrate: '8.4%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Dynamo' },
-            { id: 'haze', name: 'Haze', role: 'Assassin', winrate: '48.9%', pickrate: '21.0%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Haze' },
-            { id: 'kelvin', name: 'Kelvin', role: 'Control', winrate: '52.4%', pickrate: '9.1%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Kelvin' }
-        ];
-
-        const itemsData = [
-            { cat: 'Weapon', type: 'weapon', name: 'High-Velocity Mag', cost: 1250, desc: 'Increases bullet velocity and overall weapon damage output.' },
-            { cat: 'Vitality', type: 'vitality', name: 'Colossus', cost: 6200, desc: 'Grants massive health reserves and increases physical model size.' },
-            { cat: 'Spirit', type: 'spirit', name: 'Improved Cooldown', cost: 3000, desc: 'Reduces the recovery time required between occult abilities.' },
-            { cat: 'Weapon', type: 'weapon', name: 'Silencer', cost: 3000, desc: 'Active: Temporarily seals the target\'s ability to use skills.' }
-        ];
-
-        const patchesData = [
-            { version: 'v0.4.5', date: 'October 20, 193X', desc: 'Vindicta early game damage scaling reduced. Colossus soul cost increased. Resolved anomalies regarding Seven\'s ultimate state.' },
-            { version: 'v0.4.4', date: 'October 12, 193X', desc: 'Mid lane geometry updated to provide more cover near the transit lines. Abrams base vitality slightly increased.' }
-        ];
-
-        // ==========================================
-        // РЕНДЕРИНГ
-        // ==========================================
-
-        function renderMeta() {
-            const container = document.getElementById('tab-meta');
-            const topHeroes = [...heroesData].sort((a, b) => parseFloat(b.winrate) - parseFloat(a.winrate)).slice(0, 3);
-            
-            container.innerHTML = `
-                <div>
-                    <h2 class="text-xl occult-title text-parchment mb-4">Highest Success Rate</h2>
-                    <div class="space-y-3">
-                        ${topHeroes.map((h, i) => `
-                            <div class="bg-noirCard vintage-border p-3 flex items-center gap-4">
-                                <div class="font-serif text-xl text-parchmentMuted w-4 text-center">${i + 1}.</div>
-                                <div class="flex-1">
-                                    <div class="font-serif text-lg text-parchment">${h.name}</div>
-                                    <div class="text-[10px] text-parchmentMuted uppercase tracking-widest">${h.role}</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-parchment font-serif text-lg">${h.winrate}</div>
-                                    <div class="text-[10px] text-parchmentMuted uppercase tracking-wider">Win Rate</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div>
-                    <h2 class="text-xl occult-title text-parchment mb-4">Frequently Requisitioned</h2>
-                    <div class="grid grid-cols-2 gap-3">
-                        ${itemsData.slice(0,2).map(item => `
-                            <div class="bg-noirCard vintage-border p-4 text-center flex flex-col items-center">
-                                <div class="w-8 h-8 rounded-full border border-parchment/20 flex items-center justify-center mb-2">
-                                   <i class="fa-solid ${item.type === 'weapon' ? 'fa-crosshairs' : 'fa-heart'} text-parchmentMuted text-sm"></i>
-                                </div>
-                                <div class="text-sm font-serif text-parchment mb-1">${item.name}</div>
-                                <div class="text-parchmentMuted text-xs flex items-center gap-1 font-serif">
-                                    <i class="fa-solid fa-ghost text-[10px]"></i> ${item.cost}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderHeroes(filter = '') {
-            const container = document.getElementById('heroes-grid');
-            const filtered = heroesData.filter(h => h.name.toLowerCase().includes(filter.toLowerCase()));
-            
-            if (!filtered.length) {
-                container.innerHTML = `<div class="col-span-2 text-center text-parchmentMuted py-10 font-serif italic">No records found...</div>`;
-                return;
-            }
-
-            container.innerHTML = filtered.map(h => `
-                <div class="bg-noirCard vintage-border flex flex-col group cursor-pointer hover:bg-accentDark transition-colors">
-                    <div class="p-1 border-b border-parchment/10">
-                        <img src="${h.img}" alt="${h.name}" class="w-full h-28 object-cover vintage-photo">
-                    </div>
-                    <div class="p-3">
-                        <h3 class="font-serif text-lg text-parchment leading-none mb-1">${h.name}</h3>
-                        <p class="text-[9px] text-parchmentMuted uppercase tracking-widest">${h.role}</p>
-                        
-                        <div class="mt-3 flex justify-between items-end border-t border-parchment/10 pt-2">
-                            <span class="text-parchmentMuted text-[10px] uppercase">Win</span>
-                            <span class="text-parchment font-serif text-sm">${h.winrate}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderItems() {
-            const container = document.getElementById('tab-items');
-            container.innerHTML = `
-                <div class="space-y-3">
-                    ${itemsData.map(item => `
-                        <div class="bg-noirCard vintage-border p-4 flex gap-4">
-                            <div class="mt-1">
-                                <div class="w-10 h-10 border border-parchment/20 flex items-center justify-center bg-noirBg">
-                                    <i class="fa-solid ${item.type === 'weapon' ? 'fa-crosshairs' : item.type === 'vitality' ? 'fa-heart' : 'fa-eye'} text-parchment text-sm"></i>
-                                </div>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-1">
-                                    <div class="font-serif text-lg text-parchment leading-tight">${item.name}</div>
-                                    <div class="text-parchmentMuted text-xs flex items-center gap-1 font-serif shrink-0">
-                                        <i class="fa-solid fa-ghost text-[10px]"></i> ${item.cost}
-                                    </div>
-                                </div>
-                                <div class="text-xs text-parchmentMuted leading-relaxed">${item.desc}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderPatches() {
-            const container = document.getElementById('patches-list');
-            container.innerHTML = patchesData.map((patch, i) => `
-                <div class="relative pl-8">
-                    <!-- Узел таймлайна (точка) -->
-                    <div class="absolute left-[8px] top-1.5 w-1.5 h-1.5 bg-parchment rounded-full outline outline-4 outline-noirBg"></div>
-                    
-                    <div class="bg-noirCard vintage-border p-4">
-                        <div class="flex justify-between items-center mb-2 border-b border-parchment/10 pb-2">
-                            <h3 class="font-serif text-lg text-parchment">${patch.version}</h3>
-                            <span class="text-[10px] text-parchmentMuted tracking-wider uppercase">${patch.date}</span>
-                        </div>
-                        <p class="text-xs text-parchmentMuted leading-relaxed">${patch.desc}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        document.getElementById('hero-search').addEventListener('input', (e) => renderHeroes(e.target.value));
-
-        // Инициализация
-        renderMeta();
-        renderHeroes();
-        renderItems();
-        renderPatches();
 
     </script>
 </body>
