@@ -11,28 +11,26 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- FontAwesome -->
+    <!-- FontAwesome для иконок -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts: Rajdhani (киберспорт/техно) и Inter (для текста) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Cormorant Garamond (винтажные заголовки) и Inter (читаемый текст) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        base: '#0d0d0d',       // Глубокий черный фон
-                        surface: '#151515',    // Темно-серые карточки
-                        surfaceLight: '#1f1f1f',
-                        gold: '#d4af37',       // Классическое золото
-                        goldGlow: '#ffdf73',   // Яркое золото для свечения
-                        textMain: '#e5e5e5',
-                        textMuted: '#808080'
+                        noirBg: '#0a0a09',       // Глубокий темный фон
+                        noirCard: '#161513',     // Темно-серо-коричневый для карточек
+                        parchment: '#e6dcc6',    // Бледный пергамент для текста и акцентов
+                        parchmentMuted: '#8c8577',// Приглушенный пергамент
+                        accentDark: '#2a2825'    // Темный акцент для бордеров
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                        esports: ['Rajdhani', 'sans-serif']
+                        serif: ['"Cormorant Garamond"', 'serif']
                     }
                 }
             }
@@ -41,101 +39,105 @@
 
     <style>
         body {
-            background-color: #0d0d0d;
-            color: #e5e5e5;
+            background-color: #0a0a09;
+            color: #e6dcc6;
             font-family: 'Inter', sans-serif;
             -webkit-user-select: none;
             user-select: none;
-            overflow: hidden; /* Блокируем скролл самого body, скроллится только main */
+            overflow: hidden;
+            /* Легкий паттерн шума/старой бумаги на фоне для атмосферы */
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.03"/%3E%3C/svg%3E');
         }
 
-        /* Кастомный скроллбар */
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0d0d0d; }
-        ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 2px; }
+        ::-webkit-scrollbar-track { background: #0a0a09; }
+        ::-webkit-scrollbar-thumb { background: #2a2825; border-radius: 0px; }
 
-        /* Киберспортивные стили */
-        .esports-title {
-            font-family: 'Rajdhani', sans-serif;
-            text-transform: uppercase;
+        /* Элегантные винтажные стили */
+        .occult-title {
+            font-family: '"Cormorant Garamond"', serif;
             letter-spacing: 0.05em;
         }
 
-        .gold-border {
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
-            transition: all 0.3s ease;
+        .vintage-border {
+            border: 1px solid rgba(230, 220, 198, 0.15);
+            transition: border-color 0.3s ease;
         }
         
-        .gold-border:hover {
-            border-color: rgba(212, 175, 55, 0.8);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.8);
+        .vintage-border:hover {
+            border-color: rgba(230, 220, 198, 0.4);
         }
 
-        .glow-text {
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        /* Декоративная линия */
+        .vintage-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: rgba(230, 220, 198, 0.3);
+            margin: 1rem 0;
         }
+        .vintage-divider::before, .vintage-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(230, 220, 198, 0.15);
+        }
+        .vintage-divider:not(:empty)::before { margin-right: .5em; }
+        .vintage-divider:not(:empty)::after { margin-left: .5em; }
 
-        /* Анимация вкладок */
+        /* Вкладки */
         .tab-content {
             display: none;
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeIn 0.5s ease-out forwards;
         }
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content.active { display: block; }
+        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Эффект старого фото для аватарок героев */
+        .vintage-photo {
+            filter: grayscale(60%) sepia(30%) contrast(110%);
+            border-bottom: 1px solid rgba(230, 220, 198, 0.15);
+        }
+
         /* =========================================
-           АНИМАЦИЯ НАВИГАЦИИ (ВЫЕЗЖАЮЩИЕ КНОПКИ)
+           НАВИГАЦИЯ (МЕХАНИКА ВЫЕЗДА)
            ========================================= */
-        .nav-menu-container {
+        .nav-wrapper {
             position: fixed;
-            bottom: 20px;
+            bottom: 24px;
             left: 0;
             width: 100%;
-            height: 80px;
+            height: 70px;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 50;
-            pointer-events: none; /* Пропускаем клики сквозь контейнер */
+            pointer-events: none;
         }
 
-        /* Центральная кнопка D */
-        .center-btn {
+        /* Центральный логотип (Библиотека) */
+        .main-nav-btn {
             position: relative;
             z-index: 60;
             width: 64px;
             height: 64px;
-            background: #0d0d0d;
-            border: 2px solid #d4af37;
+            background-color: #161513;
+            background-image: url('./58401.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #e6dcc6;
             border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4), inset 0 0 10px rgba(212, 175, 55, 0.2);
-            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.3s ease;
-            pointer-events: auto; /* Возвращаем кликабельность */
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
             outline: none;
+            cursor: pointer;
         }
         
-        .center-btn.active {
+        .main-nav-btn.active {
             transform: rotate(360deg);
-            box-shadow: 0 0 25px rgba(255, 223, 115, 0.6), inset 0 0 15px rgba(212, 175, 55, 0.5);
-            border-color: #ffdf73;
-        }
-
-        .center-btn span {
-            font-family: 'Rajdhani', sans-serif;
-            color: #d4af37;
-            font-size: 32px;
-            font-weight: 700;
-            text-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
-            margin-top: 2px; /* Легкая центровка шрифта */
         }
 
         /* Выезжающие кнопки меню */
@@ -143,56 +145,56 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 46px;
-            height: 46px;
-            background: #151515;
-            border: 1px solid rgba(212, 175, 55, 0.4);
+            width: 44px;
+            height: 44px;
+            background: #161513;
+            border: 1px solid rgba(230, 220, 198, 0.3);
             border-radius: 50%;
-            color: #808080;
+            color: #8c8577;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
-            /* Прячем их за центральной кнопкой по умолчанию */
+            font-size: 16px;
             transform: translate(-50%, -50%) scale(0.5);
             opacity: 0;
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: auto;
             z-index: 55;
+            cursor: pointer;
         }
 
         .nav-item.selected {
-            color: #d4af37;
-            border-color: #d4af37;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            color: #e6dcc6;
+            border-color: #e6dcc6;
+            background: #2a2825;
         }
 
-        /* Состояния выезда (рассчитано от центра экрана влево и вправо) */
+        /* Позиции при выезде */
         .nav-expanded .nav-item[data-target="meta"] {
-            transform: translate(calc(-50% - 120px), -50%) scale(1);
+            transform: translate(calc(-50% - 130px), -50%) scale(1);
             opacity: 1;
         }
         .nav-expanded .nav-item[data-target="heroes"] {
-            transform: translate(calc(-50% - 65px), -50%) scale(1);
+            transform: translate(calc(-50% - 70px), -50%) scale(1);
             opacity: 1;
         }
         .nav-expanded .nav-item[data-target="items"] {
-            transform: translate(calc(-50% + 65px), -50%) scale(1);
+            transform: translate(calc(-50% + 70px), -50%) scale(1);
             opacity: 1;
         }
         .nav-expanded .nav-item[data-target="patches"] {
-            transform: translate(calc(-50% + 120px), -50%) scale(1);
+            transform: translate(calc(-50% + 130px), -50%) scale(1);
             opacity: 1;
         }
 
-        /* Метки над кнопками при открытом меню */
+        /* Метки над кнопками */
         .nav-label {
             position: absolute;
-            top: -20px;
-            font-size: 10px;
-            font-family: 'Rajdhani', sans-serif;
-            text-transform: uppercase;
-            font-weight: 700;
+            top: -24px;
+            font-size: 11px;
+            font-family: '"Cormorant Garamond"', serif;
+            letter-spacing: 0.05em;
+            color: #e6dcc6;
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -200,45 +202,34 @@
         }
         .nav-expanded .nav-item .nav-label {
             opacity: 1;
-            transition-delay: 0.2s;
-        }
-        .nav-item.selected .nav-label {
-            color: #d4af37;
-            text-shadow: 0 0 5px rgba(212,175,55,0.5);
+            transition-delay: 0.1s;
         }
     </style>
 </head>
 <body class="flex flex-col h-screen">
 
-    <!-- Верхний бар -->
-    <header class="bg-base border-b border-gold/30 p-4 flex justify-between items-center z-10 shrink-0 relative">
-        <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent opacity-50"></div>
-        <div class="flex items-center gap-3">
-            <span class="text-gold text-2xl"><i class="fa-solid fa-chart-simple"></i></span>
-            <div>
-                <h1 class="text-textMain esports-title font-bold text-xl leading-none">Deadlock<span class="text-gold glow-text">ONE</span></h1>
-                <p class="text-[10px] text-textMuted uppercase tracking-widest mt-1">Esports Tracker</p>
-            </div>
-        </div>
-        <div id="user-info" class="text-xs text-gold/80 esports-title font-bold tracking-wider"></div>
+    <!-- Заголовок -->
+    <header class="bg-noirBg pt-6 pb-4 px-4 flex flex-col items-center justify-center z-10 shrink-0 border-b border-white/5 relative">
+        <h1 class="text-parchment occult-title text-3xl font-semibold">Deadlock Library</h1>
+        <div class="vintage-divider w-32 mt-2 mb-0"><i class="fa-solid fa-diamond text-[6px]"></i></div>
+        <div id="user-info" class="absolute top-4 right-4 text-[10px] text-parchmentMuted uppercase tracking-widest font-sans"></div>
     </header>
 
     <!-- Основной контент -->
-    <!-- pb-28 чтобы контент не перекрывался выезжающим меню -->
-    <main class="flex-1 overflow-y-auto pb-28 px-4 pt-4 relative bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" id="main-content">
+    <main class="flex-1 overflow-y-auto pb-32 px-4 pt-6" id="main-content">
         
         <!-- Вкладка: META -->
-        <section id="tab-meta" class="tab-content active space-y-6">
+        <section id="tab-meta" class="tab-content active space-y-8">
             <!-- Заполняется JS -->
         </section>
 
         <!-- Вкладка: HEROES -->
-        <section id="tab-heroes" class="tab-content space-y-4">
+        <section id="tab-heroes" class="tab-content space-y-5">
             <div class="relative">
-                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gold/50"></i>
-                <input type="text" id="hero-search" placeholder="CALLSIGN / HERO..." class="w-full bg-surface border border-gold/30 rounded pl-10 pr-4 py-3 text-textMain placeholder-textMuted focus:outline-none focus:border-gold esports-title text-sm transition-colors">
+                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-parchmentMuted text-sm"></i>
+                <input type="text" id="hero-search" placeholder="Search the archives..." class="w-full bg-noirCard vintage-border rounded-none pl-9 pr-4 py-2.5 text-parchment placeholder-parchmentMuted focus:outline-none focus:border-parchment font-serif text-lg transition-colors">
             </div>
-            <div id="heroes-grid" class="grid grid-cols-2 gap-3">
+            <div id="heroes-grid" class="grid grid-cols-2 gap-4">
                 <!-- Заполняется JS -->
             </div>
         </section>
@@ -249,45 +240,43 @@
         </section>
 
         <!-- Вкладка: PATCHES -->
-        <section id="tab-patches" class="tab-content space-y-4">
-            <h2 class="text-2xl esports-title text-textMain flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-code-branch text-gold"></i> Patch Intel
-            </h2>
-            <div id="patches-list" class="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gold/30 before:to-transparent">
+        <section id="tab-patches" class="tab-content space-y-6">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl occult-title text-parchment">Archive Records</h2>
+                <p class="text-xs text-parchmentMuted mt-1">Recent adjustments and findings</p>
+            </div>
+            <div id="patches-list" class="space-y-6 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px before:h-full before:w-[1px] before:bg-accentDark">
                 <!-- Заполняется JS -->
             </div>
         </section>
 
     </main>
 
-    <!-- Выезжающее навигационное меню -->
-    <div class="nav-menu-container" id="nav-container">
+    <!-- Выезжающее меню -->
+    <div class="nav-wrapper" id="nav-container">
         
-        <!-- Кнопки разделов (спрятаны) -->
         <button class="nav-item selected" data-target="meta" onclick="selectTab('meta')">
             <span class="nav-label">Meta</span>
-            <i class="fa-solid fa-fire"></i>
+            <i class="fa-solid fa-chart-line"></i>
         </button>
         
         <button class="nav-item" data-target="heroes" onclick="selectTab('heroes')">
-            <span class="nav-label">Heroes</span>
-            <i class="fa-solid fa-users"></i>
+            <span class="nav-label">Roster</span>
+            <i class="fa-solid fa-users-viewfinder"></i>
         </button>
         
         <button class="nav-item" data-target="items" onclick="selectTab('items')">
-            <span class="nav-label">Items</span>
-            <i class="fa-solid fa-cube"></i>
+            <span class="nav-label">Armory</span>
+            <i class="fa-solid fa-box-open"></i>
         </button>
         
         <button class="nav-item" data-target="patches" onclick="selectTab('patches')">
-            <span class="nav-label">Intel</span>
-            <i class="fa-solid fa-terminal"></i>
+            <span class="nav-label">Records</span>
+            <i class="fa-solid fa-scroll"></i>
         </button>
 
-        <!-- Центральная кнопка D (Логотип) -->
-        <button class="center-btn" id="center-logo" onclick="toggleNav()">
-            <span>D</span>
-        </button>
+        <!-- Центральная кнопка с логотипом -->
+        <button class="main-nav-btn" id="center-logo" onclick="toggleNav()"></button>
     </div>
 
     <!-- Скрипты -->
@@ -296,17 +285,15 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
-        tg.setHeaderColor('#0d0d0d');
-        tg.setBackgroundColor('#0d0d0d');
+        tg.setHeaderColor('#0a0a09');
+        tg.setBackgroundColor('#0a0a09');
 
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-info').innerText = `[ ${tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name} ]`;
-        } else {
-            document.getElementById('user-info').innerText = `[ GUEST ]`;
+            document.getElementById('user-info').innerText = `Investigator: ${tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name}`;
         }
 
         // ==========================================
-        // ЛОГИКА АНИМАЦИИ МЕНЮ
+        // НАВИГАЦИЯ
         // ==========================================
         let isNavOpen = false;
         const navContainer = document.getElementById('nav-container');
@@ -317,69 +304,59 @@
             if (isNavOpen) {
                 navContainer.classList.add('nav-expanded');
                 centerLogo.classList.add('active');
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             } else {
                 navContainer.classList.remove('nav-expanded');
                 centerLogo.classList.remove('active');
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             }
         }
 
         function selectTab(tabId) {
-            // Закрываем все вкладки
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            // Открываем нужную
             document.getElementById(`tab-${tabId}`).classList.add('active');
             
-            // Обновляем визуальный статус кнопок навигации
             document.querySelectorAll('.nav-item').forEach(btn => {
-                if(btn.dataset.target === tabId) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
+                if(btn.dataset.target === tabId) btn.classList.add('selected');
+                else btn.classList.remove('selected');
             });
 
-            // Скролл вверх
             document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Закрываем меню после выбора
             toggleNav();
         }
 
-        // Закрытие меню при клике в пустое место
         document.getElementById('main-content').addEventListener('click', () => {
             if (isNavOpen) toggleNav();
         });
 
 
         // ==========================================
-        // ДАННЫЕ И РЕНДЕРИНГ (MOCK DATA)
+        // ДАННЫЕ (MOCK DATA)
         // ==========================================
 
         const heroesData = [
-            { id: 'seven', name: 'Seven', role: 'Carry', winrate: '54.2%', pickrate: '18.5%', kda: '3.2', img: 'https://placehold.co/200x200/151515/d4af37?text=Svn' },
-            { id: 'vindicta', name: 'Vindicta', role: 'Sniper', winrate: '51.8%', pickrate: '15.2%', kda: '3.8', img: 'https://placehold.co/200x200/151515/d4af37?text=Vnd' },
-            { id: 'abrams', name: 'Abrams', role: 'Bruiser', winrate: '53.1%', pickrate: '14.8%', kda: '2.5', img: 'https://placehold.co/200x200/151515/d4af37?text=Abr' },
-            { id: 'dynamo', name: 'Dynamo', role: 'Support', winrate: '49.5%', pickrate: '8.4%', kda: '1.9', img: 'https://placehold.co/200x200/151515/d4af37?text=Dyn' },
-            { id: 'haze', name: 'Haze', role: 'Assassin', winrate: '48.9%', pickrate: '21.0%', kda: '2.8', img: 'https://placehold.co/200x200/151515/d4af37?text=Hz' },
-            { id: 'kelvin', name: 'Kelvin', role: 'Control', winrate: '52.4%', pickrate: '9.1%', kda: '2.9', img: 'https://placehold.co/200x200/151515/d4af37?text=Klv' }
+            { id: 'seven', name: 'Seven', role: 'Carry', winrate: '54.2%', pickrate: '18.5%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Seven' },
+            { id: 'vindicta', name: 'Vindicta', role: 'Sniper', winrate: '51.8%', pickrate: '15.2%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Vindicta' },
+            { id: 'abrams', name: 'Abrams', role: 'Bruiser', winrate: '53.1%', pickrate: '14.8%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Abrams' },
+            { id: 'dynamo', name: 'Dynamo', role: 'Support', winrate: '49.5%', pickrate: '8.4%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Dynamo' },
+            { id: 'haze', name: 'Haze', role: 'Assassin', winrate: '48.9%', pickrate: '21.0%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Haze' },
+            { id: 'kelvin', name: 'Kelvin', role: 'Control', winrate: '52.4%', pickrate: '9.1%', img: 'https://placehold.co/300x250/161513/e6dcc6?text=Kelvin' }
         ];
 
         const itemsData = [
-            { cat: 'Weapon', color: 'text-orange-500', name: 'High-Velocity Mag', cost: 1250, desc: '+ Bullet Velocity & Damage.' },
-            { cat: 'Weapon', color: 'text-orange-500', name: 'Silencer', cost: 3000, desc: 'Active: Silences target on hit.' },
-            { cat: 'Vitality', color: 'text-green-500', name: 'Bullet Armor', cost: 1250, desc: '+20% Bullet Resist.' },
-            { cat: 'Vitality', color: 'text-green-500', name: 'Colossus', cost: 6200, desc: 'Massive HP & Model size increase.' },
-            { cat: 'Spirit', color: 'text-purple-500', name: 'Improved Cooldown', cost: 3000, desc: 'Reduces abilities cooldown.' },
-            { cat: 'Spirit', color: 'text-purple-500', name: 'Diviner\'s Kevlar', cost: 6200, desc: 'Spirit Shield & Lifesteal.' }
+            { cat: 'Weapon', type: 'weapon', name: 'High-Velocity Mag', cost: 1250, desc: 'Increases bullet velocity and overall weapon damage output.' },
+            { cat: 'Vitality', type: 'vitality', name: 'Colossus', cost: 6200, desc: 'Grants massive health reserves and increases physical model size.' },
+            { cat: 'Spirit', type: 'spirit', name: 'Improved Cooldown', cost: 3000, desc: 'Reduces the recovery time required between occult abilities.' },
+            { cat: 'Weapon', type: 'weapon', name: 'Silencer', cost: 3000, desc: 'Active: Temporarily seals the target\'s ability to use skills.' }
         ];
 
         const patchesData = [
-            { version: 'v0.4.5', date: 'OCT 20, 2026', type: 'balance', desc: 'Vindicta early game damage scaling reduced by 12%. Colossus cost increased to 6200 souls. Seven Ultimate bug fixed.' },
-            { version: 'v0.4.4', date: 'OCT 12, 2026', type: 'map', desc: 'Mid lane geometry updated. Added new cover spots near the transit lines. Abrams base health +50.' },
-            { version: 'v0.4.3', date: 'OCT 01, 2026', type: 'system', desc: 'Global economy overhaul. Jungle creeps now yield 10% fewer souls in the first 10 minutes.' }
+            { version: 'v0.4.5', date: 'October 20, 193X', desc: 'Vindicta early game damage scaling reduced. Colossus soul cost increased. Resolved anomalies regarding Seven\'s ultimate state.' },
+            { version: 'v0.4.4', date: 'October 12, 193X', desc: 'Mid lane geometry updated to provide more cover near the transit lines. Abrams base vitality slightly increased.' }
         ];
+
+        // ==========================================
+        // РЕНДЕРИНГ
+        // ==========================================
 
         function renderMeta() {
             const container = document.getElementById('tab-meta');
@@ -387,45 +364,38 @@
             
             container.innerHTML = `
                 <div>
-                    <h2 class="text-xl esports-title text-textMain flex items-center gap-2 mb-4">
-                        <i class="fa-solid fa-trophy text-gold"></i> Top Tier Agents
-                    </h2>
+                    <h2 class="text-xl occult-title text-parchment mb-4">Highest Success Rate</h2>
                     <div class="space-y-3">
                         ${topHeroes.map((h, i) => `
-                            <div class="bg-surface border-l-4 border-gold rounded p-3 flex items-center gap-4 relative overflow-hidden">
-                                <!-- Фоновое свечение -->
-                                <div class="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-gold/10 to-transparent"></div>
-                                
-                                <div class="text-2xl font-bold text-gold/30 esports-title w-6 text-center">0${i + 1}</div>
-                                <img src="${h.img}" alt="${h.name}" class="w-12 h-12 rounded bg-base border border-gold/20">
-                                <div class="flex-1 relative z-10">
-                                    <div class="font-bold text-lg text-textMain esports-title tracking-wide">${h.name}</div>
-                                    <div class="text-[10px] text-textMuted uppercase tracking-widest">${h.role}</div>
+                            <div class="bg-noirCard vintage-border p-3 flex items-center gap-4">
+                                <div class="font-serif text-xl text-parchmentMuted w-4 text-center">${i + 1}.</div>
+                                <div class="flex-1">
+                                    <div class="font-serif text-lg text-parchment">${h.name}</div>
+                                    <div class="text-[10px] text-parchmentMuted uppercase tracking-widest">${h.role}</div>
                                 </div>
-                                <div class="text-right relative z-10">
-                                    <div class="text-gold glow-text font-bold text-lg">${h.winrate}</div>
-                                    <div class="text-[10px] text-textMuted uppercase">Win Rate</div>
+                                <div class="text-right">
+                                    <div class="text-parchment font-serif text-lg">${h.winrate}</div>
+                                    <div class="text-[10px] text-parchmentMuted uppercase tracking-wider">Win Rate</div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
 
-                <div class="mt-8">
-                    <h2 class="text-xl esports-title text-textMain flex items-center gap-2 mb-4">
-                        <i class="fa-solid fa-fire-flame-curved text-gold"></i> Meta Items
-                    </h2>
+                <div>
+                    <h2 class="text-xl occult-title text-parchment mb-4">Frequently Requisitioned</h2>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-surface gold-border rounded p-3 text-center">
-                            <i class="fa-solid fa-crosshairs text-orange-500 mb-2 text-xl drop-shadow-[0_0_5px_rgba(249,115,22,0.8)]"></i>
-                            <div class="text-sm font-bold text-textMain esports-title">High-Velocity Mag</div>
-                            <div class="text-gold text-xs mt-1 font-bold"><i class="fa-solid fa-coins text-[10px]"></i> 1250</div>
-                        </div>
-                        <div class="bg-surface gold-border rounded p-3 text-center">
-                            <i class="fa-solid fa-heart-pulse text-green-500 mb-2 text-xl drop-shadow-[0_0_5px_rgba(34,197,94,0.8)]"></i>
-                            <div class="text-sm font-bold text-textMain esports-title">Colossus</div>
-                            <div class="text-gold text-xs mt-1 font-bold"><i class="fa-solid fa-coins text-[10px]"></i> 6200</div>
-                        </div>
+                        ${itemsData.slice(0,2).map(item => `
+                            <div class="bg-noirCard vintage-border p-4 text-center flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full border border-parchment/20 flex items-center justify-center mb-2">
+                                   <i class="fa-solid ${item.type === 'weapon' ? 'fa-crosshairs' : 'fa-heart'} text-parchmentMuted text-sm"></i>
+                                </div>
+                                <div class="text-sm font-serif text-parchment mb-1">${item.name}</div>
+                                <div class="text-parchmentMuted text-xs flex items-center gap-1 font-serif">
+                                    <i class="fa-solid fa-ghost text-[10px]"></i> ${item.cost}
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             `;
@@ -436,29 +406,22 @@
             const filtered = heroesData.filter(h => h.name.toLowerCase().includes(filter.toLowerCase()));
             
             if (!filtered.length) {
-                container.innerHTML = `<div class="col-span-2 text-center text-textMuted py-10 esports-title">AGENT NOT FOUND</div>`;
+                container.innerHTML = `<div class="col-span-2 text-center text-parchmentMuted py-10 font-serif italic">No records found...</div>`;
                 return;
             }
 
             container.innerHTML = filtered.map(h => `
-                <div class="bg-surface gold-border rounded overflow-hidden flex flex-col relative group">
-                    <!-- Техно-декор уголок -->
-                    <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-gold/50 m-1"></div>
-                    
-                    <img src="${h.img}" alt="${h.name}" class="w-full h-24 object-cover opacity-80 group-hover:opacity-100 transition-opacity">
-                    <div class="p-3 flex-1 flex flex-col">
-                        <h3 class="font-bold text-gold glow-text esports-title text-lg uppercase leading-none">${h.name}</h3>
-                        <p class="text-[10px] text-textMuted uppercase tracking-widest mb-2 mt-1">${h.role}</p>
+                <div class="bg-noirCard vintage-border flex flex-col group cursor-pointer hover:bg-accentDark transition-colors">
+                    <div class="p-1 border-b border-parchment/10">
+                        <img src="${h.img}" alt="${h.name}" class="w-full h-28 object-cover vintage-photo">
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-serif text-lg text-parchment leading-none mb-1">${h.name}</h3>
+                        <p class="text-[9px] text-parchmentMuted uppercase tracking-widest">${h.role}</p>
                         
-                        <div class="mt-auto grid grid-cols-2 gap-1 border-t border-gold/20 pt-2">
-                            <div>
-                                <span class="text-textMuted block text-[8px] uppercase">WR</span>
-                                <span class="text-textMain text-sm font-bold">${h.winrate}</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-textMuted block text-[8px] uppercase">KDA</span>
-                                <span class="text-textMain text-sm font-bold">${h.kda}</span>
-                            </div>
+                        <div class="mt-3 flex justify-between items-end border-t border-parchment/10 pt-2">
+                            <span class="text-parchmentMuted text-[10px] uppercase">Win</span>
+                            <span class="text-parchment font-serif text-sm">${h.winrate}</span>
                         </div>
                     </div>
                 </div>
@@ -468,23 +431,22 @@
         function renderItems() {
             const container = document.getElementById('tab-items');
             container.innerHTML = `
-                <h2 class="text-xl esports-title text-textMain flex items-center gap-2 mb-2">
-                    <i class="fa-solid fa-cubes text-gold"></i> Armory
-                </h2>
                 <div class="space-y-3">
                     ${itemsData.map(item => `
-                        <div class="bg-surface gold-border rounded p-3 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded bg-base border border-gold/20 flex items-center justify-center ${item.color}">
-                                    <i class="fa-solid ${item.cat === 'Weapon' ? 'fa-crosshairs' : item.cat === 'Vitality' ? 'fa-heart' : 'fa-fire-flame-curved'}"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-textMain esports-title text-base tracking-wide">${item.name}</div>
-                                    <div class="text-[10px] text-textMuted line-clamp-1">${item.desc}</div>
+                        <div class="bg-noirCard vintage-border p-4 flex gap-4">
+                            <div class="mt-1">
+                                <div class="w-10 h-10 border border-parchment/20 flex items-center justify-center bg-noirBg">
+                                    <i class="fa-solid ${item.type === 'weapon' ? 'fa-crosshairs' : item.type === 'vitality' ? 'fa-heart' : 'fa-eye'} text-parchment text-sm"></i>
                                 </div>
                             </div>
-                            <div class="text-gold font-bold flex items-center gap-1 shrink-0">
-                                <i class="fa-solid fa-coins text-[10px]"></i> ${item.cost}
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <div class="font-serif text-lg text-parchment leading-tight">${item.name}</div>
+                                    <div class="text-parchmentMuted text-xs flex items-center gap-1 font-serif shrink-0">
+                                        <i class="fa-solid fa-ghost text-[10px]"></i> ${item.cost}
+                                    </div>
+                                </div>
+                                <div class="text-xs text-parchmentMuted leading-relaxed">${item.desc}</div>
                             </div>
                         </div>
                     `).join('')}
@@ -495,28 +457,21 @@
         function renderPatches() {
             const container = document.getElementById('patches-list');
             container.innerHTML = patchesData.map((patch, i) => `
-                <div class="relative flex items-start group">
-                    <!-- Узел таймлайна -->
-                    <div class="absolute left-0 md:left-1/2 flex items-center justify-center w-10 h-10 -ml-5 md:-ml-5 bg-base border-2 border-gold rounded-full z-10 shadow-[0_0_10px_rgba(212,175,55,0.5)]">
-                        <i class="fa-solid ${patch.type === 'balance' ? 'fa-scale-balanced' : patch.type === 'map' ? 'fa-map' : 'fa-gear'} text-gold text-sm"></i>
-                    </div>
+                <div class="relative pl-8">
+                    <!-- Узел таймлайна (точка) -->
+                    <div class="absolute left-[8px] top-1.5 w-1.5 h-1.5 bg-parchment rounded-full outline outline-4 outline-noirBg"></div>
                     
-                    <!-- Карточка -->
-                    <div class="ml-8 md:ml-0 md:w-1/2 ${i % 2 === 0 ? 'md:pr-10' : 'md:pl-10 md:ml-auto'} pb-6">
-                        <div class="bg-surface gold-border p-4 rounded relative">
-                            <!-- Декоративная линия коннектора для десктопа (в ТГ не особо видно, но структура правильная) -->
-                            <div class="flex justify-between items-end mb-2 border-b border-gold/20 pb-2">
-                                <h3 class="font-bold text-gold glow-text esports-title text-lg">${patch.version}</h3>
-                                <span class="text-[10px] text-textMuted font-mono tracking-widest">${patch.date}</span>
-                            </div>
-                            <p class="text-xs text-textMain leading-relaxed">${patch.desc}</p>
+                    <div class="bg-noirCard vintage-border p-4">
+                        <div class="flex justify-between items-center mb-2 border-b border-parchment/10 pb-2">
+                            <h3 class="font-serif text-lg text-parchment">${patch.version}</h3>
+                            <span class="text-[10px] text-parchmentMuted tracking-wider uppercase">${patch.date}</span>
                         </div>
+                        <p class="text-xs text-parchmentMuted leading-relaxed">${patch.desc}</p>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Слушатель поиска
         document.getElementById('hero-search').addEventListener('input', (e) => renderHeroes(e.target.value));
 
         // Инициализация
@@ -528,4 +483,3 @@
     </script>
 </body>
 </html>
-```
