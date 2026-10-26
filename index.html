@@ -2,542 +2,230 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Deadlock Library</title>
-    
-    <!-- Telegram Web App SDK -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadlock Hub</title>
+    <!-- Подключаем скрипт Telegram Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: Cormorant Garamond for titles, Inter for text -->
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        noir: '#0d0e12',
-                        brass: '#c5a059',
-                        brassDim: '#8b6f3a',
-                        mystic: '#29c5c5',
-                        textMain: '#e0d8c3',
-                        textMuted: '#9a9483'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['"Cormorant Garamond"', 'serif']
-                    }
-                }
-            }
-        }
-    </script>
-
     <style>
+        /* Стили адаптируются под темную/светлую тему самого Telegram пользователя */
         body {
-            background-color: #0d0e12;
-            color: #e0d8c3;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            -webkit-user-select: none; user-select: none;
-            /* Subtle texture */
-            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.04"/%3E%3C/svg%3E');
+            font-family: sans-serif;
+            background-color: var(--tg-theme-bg-color, #1e1e1e);
+            color: var(--tg-theme-text-color, #ffffff);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-
-        /* Glassmorphism Classes */
-        .glass {
-            background: rgba(13, 14, 18, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(197, 160, 89, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
         }
-
-        .glass-btn {
-            background: rgba(13, 14, 18, 0.4);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(197, 160, 89, 0.3);
-            transition: all 0.3s ease;
+        .hidden { display: none !important; }
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
         }
-        .glass-btn:active { background: rgba(197, 160, 89, 0.15); border-color: #c5a059; }
-
-        /* Typography */
-        .title-serif { font-family: '"Cormorant Garamond"', serif; }
-
-        /* Transitions & Animations */
-        .fade-enter { animation: fadeIn 0.4s ease forwards; }
-        .fade-exit { animation: fadeOut 0.3s ease forwards; }
-        .slide-up { animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Scrollbar hide */
-        ::-webkit-scrollbar { width: 0; display: none; }
-
-        /* Main Navigation (Bottom) */
-        .nav-wrapper {
-            position: fixed; bottom: 20px; left: 0; width: 100%; height: 70px;
-            display: flex; justify-content: center; align-items: center; z-index: 40; pointer-events: none;
+        button {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 8px 0;
+            width: 100%;
+            font-weight: bold;
         }
-
-        .nav-center-btn {
-            position: relative; z-index: 50; width: 64px; height: 64px;
-            background-color: #0d0e12;
-            background-image: url('58401.jpg'); /* Логотип */
-            background-size: cover; background-position: center;
-            border: 2px solid #c5a059; border-radius: 50%;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
-            pointer-events: auto; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        button.small {
+            width: auto;
+            font-size: 14px;
+            padding: 6px 12px;
+            background-color: var(--tg-theme-secondary-bg-color, #444);
+            color: var(--tg-theme-text-color, #fff);
         }
-        /* Fallback if image is missing */
-        .nav-center-btn::before {
-            content: 'D'; font-family: '"Cormorant Garamond"', serif; font-size: 28px; color: #c5a059;
-            position: absolute; z-index: -1;
+        input {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--tg-theme-hint-color, #555);
+            background: var(--tg-theme-bg-color, #222);
+            color: var(--tg-theme-text-color, #fff);
+            font-size: 16px;
         }
-
-        .nav-center-btn.active { transform: rotate(360deg); box-shadow: 0 0 15px rgba(41, 197, 197, 0.4); border-color: #29c5c5; }
-
-        .nav-item {
-            position: absolute; top: 50%; left: 50%; width: 46px; height: 46px;
-            background: rgba(13, 14, 18, 0.8); border: 1px solid rgba(197, 160, 89, 0.4); border-radius: 50%;
-            color: #9a9483; display: flex; justify-content: center; align-items: center;
-            font-size: 18px; transform: translate(-50%, -50%) scale(0.5);
-            opacity: 0; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: auto; z-index: 45; backdrop-filter: blur(5px);
+        .profile-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
-
-        .nav-item.selected { color: #29c5c5; border-color: #29c5c5; background: rgba(41, 197, 197, 0.1); }
-
-        .nav-expanded .nav-item[data-target="meta"] { transform: translate(calc(-50% - 130px), -50%) scale(1); opacity: 1; }
-        .nav-expanded .nav-item[data-target="heroes"] { transform: translate(calc(-50% - 65px), -50%) scale(1); opacity: 1; }
-        .nav-expanded .nav-item[data-target="items"] { transform: translate(calc(-50% + 65px), -50%) scale(1); opacity: 1; }
-        .nav-expanded .nav-item[data-target="patches"] { transform: translate(calc(-50% + 130px), -50%) scale(1); opacity: 1; }
-
-        /* Fullscreen Hero View */
-        #hero-detail-view {
-            position: fixed; inset: 0; z-index: 100; display: none;
+        .profile-list li {
+            background: var(--tg-theme-secondary-bg-color, #333);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s opacity;
         }
-        
-        #hd-background {
-            position: absolute; inset: 0; background-size: cover; background-position: top center; z-index: 0;
-            /* Placeholder мрачный арт. При наличии реальных фото героев, менять эту картинку в JS */
-            background-image: url('https://images.unsplash.com/photo-1509268415707-11116c478df8?q=80&w=1000&auto=format&fit=crop');
+        .profile-list li:active {
+            opacity: 0.7;
         }
-        
-        /* Градиент для затемнения фона, чтобы интерфейс читался */
-        .hd-gradient {
-            position: absolute; inset: 0; z-index: 1;
-            background: linear-gradient(180deg, rgba(13,14,18,0.3) 0%, rgba(13,14,18,0.6) 40%, rgba(13,14,18,0.95) 100%);
+        .profile-id {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #aaa);
         }
-
-        /* Способности (Анимация перехода) */
-        .ability-box {
-            width: 100%; aspect-ratio: 1/1; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .abilities-container.expanded .ability-box:not(.active-ability) {
-            opacity: 0; width: 0; padding: 0; margin: 0; border: none; overflow: hidden;
-        }
-        .abilities-container.expanded .active-ability {
-            width: 64px; height: 64px; flex-shrink: 0; border-color: #29c5c5; color: #29c5c5;
-        }
-        #ability-details {
-            opacity: 0; transform: translateX(20px); transition: all 0.4s ease; display: none;
-        }
-        .abilities-container.expanded #ability-details {
-            display: flex; opacity: 1; transform: translateX(0);
-        }
-
     </style>
 </head>
-<body class="flex flex-col h-screen relative text-textMain">
+<body>
 
-    <!-- MAIN VIEWS CONTAINER -->
-    <div id="main-views" class="flex-1 overflow-y-auto pb-32 px-5 pt-8 z-10 relative">
-        <!-- HEADER -->
-        <header class="text-center mb-8">
-            <h1 class="title-serif text-3xl font-semibold tracking-widest text-brass">THE ARCHIVES</h1>
-            <div class="h-[1px] w-1/3 bg-brassDim mx-auto mt-2 opacity-50"></div>
-        </header>
+<!-- Кнопка смены профиля сверху -->
+<div class="header hidden" id="header">
+    <button class="small" onclick="resetProfile()">🔄 Сменить профиль</button>
+</div>
 
-        <!-- VIEWS -->
-        <div id="view-meta" class="hidden text-center text-textMuted title-serif italic mt-20 fade-enter">
-            Ritual data gathering in progress...
-        </div>
+<!-- Экран 1: Ввод ника -->
+<div class="container" id="step-login">
+    <h2>Deadlock Hub</h2>
+    <p>Введи свой никнейм в Steam</p>
+    <input type="text" id="steam-nick" placeholder="Например: gabe_newell">
+    <button onclick="searchProfiles()">Найти профиль</button>
+</div>
 
-        <div id="view-heroes" class="block fade-enter">
-            <div id="heroes-grid" class="grid grid-cols-3 gap-4">
-                <!-- Сетка генерируется в JS -->
-            </div>
-        </div>
+<!-- Экран 2: Выбор профиля -->
+<div class="container hidden" id="step-select">
+    <h2>Выбери свой профиль</h2>
+    <p>Найдено несколько совпадений:</p>
+    <ul class="profile-list" id="profiles-container">
+        <!-- Сюда динамически вставятся результаты -->
+    </ul>
+    <button class="small" onclick="showStep('login')">⬅ Назад</button>
+</div>
 
-        <div id="view-items" class="hidden text-center text-textMuted title-serif italic mt-20 fade-enter">
-            The Armory is sealed.
-        </div>
+<!-- Экран 3: Хаб -->
+<div class="container hidden" id="step-hub">
+    <h2 id="hub-title">Привет!</h2>
+    <p>Где посмотрим статистику?</p>
+    <button onclick="openSite('https://statlocker.gg')">📊 Statlocker</button>
+    <button onclick="openSite('https://buildlocker.gg')">🛠 Buildlocker</button>
+</div>
 
-        <div id="view-patches" class="hidden text-center text-textMuted title-serif italic mt-20 fade-enter">
-            Awaiting the next paradigm shift...
-        </div>
-    </div>
+<script>
+    // Инициализация Telegram Web App
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Открываем приложение на всю высоту
 
-    <!-- MAIN NAVIGATION -->
-    <div class="nav-wrapper" id="nav-container">
-        <button class="nav-item" data-target="meta" onclick="switchView('meta')"><i class="fa-solid fa-chart-line"></i></button>
-        <button class="nav-item selected" data-target="heroes" onclick="switchView('heroes')"><i class="fa-solid fa-users"></i></button>
-        <button class="nav-item" data-target="items" onclick="switchView('items')"><i class="fa-solid fa-box"></i></button>
-        <button class="nav-item" data-target="patches" onclick="switchView('patches')"><i class="fa-solid fa-scroll"></i></button>
+    // Функция поиска профилей
+    async function searchProfiles() {
+        const nick = document.getElementById('steam-nick').value.trim();
+        if (!nick) {
+            tg.showAlert("Пожалуйста, введи никнейм!");
+            return;
+        }
 
-        <!-- Центральная кнопка (Логотип) -->
-        <button class="nav-center-btn" id="nav-toggle-btn" onclick="toggleNav()"></button>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- HERO DETAIL FULLSCREEN VIEW (ПЕРСОНАЖ) -->
-    <!-- ========================================== -->
-    <div id="hero-detail-view">
-        <div id="hd-background"></div>
-        <div class="hd-gradient"></div>
-
-        <!-- UI Парящий поверх фона -->
-        <div class="relative z-10 w-full h-full flex flex-col p-5">
-            
-            <!-- Шапка: Кнопка назад и Имя -->
-            <div class="flex items-center gap-4 mt-4 mb-auto slide-up" style="animation-delay: 0.1s;">
-                <button onclick="closeHeroDetail()" class="glass-btn w-10 h-10 rounded-full flex items-center justify-center text-brass hover:text-mystic">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-textMuted uppercase tracking-widest font-sans">Dossier</span>
-                    <h2 id="hd-name" class="title-serif text-4xl text-brass font-bold uppercase tracking-wide leading-none"></h2>
-                </div>
-            </div>
-
-            <!-- Центральный блок (Левая и Правая панели) -->
-            <div class="flex justify-between items-start w-full mt-auto mb-6 slide-up" style="animation-delay: 0.2s;">
-                
-                <!-- Левая панель: Ранги и Статы -->
-                <div class="glass p-3 rounded-lg w-28 flex flex-col gap-3">
-                    <!-- Переключатели рангов -->
-                    <div class="flex flex-col gap-1 border-b border-brass/20 pb-2">
-                        <button class="rank-btn text-xs text-left font-sans text-textMuted transition-colors" data-rank="low" onclick="setRank('low')">Low Tier</button>
-                        <button class="rank-btn text-xs text-left font-sans text-mystic font-medium transition-colors" data-rank="mid" onclick="setRank('mid')">Mid Tier</button>
-                        <button class="rank-btn text-xs text-left font-sans text-textMuted transition-colors" data-rank="high" onclick="setRank('high')">Eternus</button>
-                    </div>
-                    <!-- Статы -->
-                    <div class="flex flex-col gap-1">
-                        <div class="flex justify-between items-end">
-                            <span class="text-[10px] text-brassDim font-sans">ПР</span>
-                            <span id="hd-pr" class="title-serif text-lg text-textMain leading-none">--%</span>
-                        </div>
-                        <div class="flex justify-between items-end">
-                            <span class="text-[10px] text-brassDim font-sans">ВР</span>
-                            <span id="hd-vr" class="title-serif text-lg text-textMain leading-none">--%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Правая панель: Кнопки П и Л -->
-                <div class="flex flex-col gap-3">
-                    <button onclick="openModal('items')" class="glass-btn w-12 h-12 rounded-lg flex items-center justify-center title-serif text-xl text-brass">
-                        П
-                    </button>
-                    <button onclick="openModal('lore')" class="glass-btn w-12 h-12 rounded-lg flex items-center justify-center title-serif text-xl text-brass">
-                        Л
-                    </button>
-                </div>
-            </div>
-
-            <!-- Нижняя панель: Способности -->
-            <div class="w-full pb-8 slide-up" style="animation-delay: 0.3s;">
-                <!-- Кнопка возврата к 4 квадратам (Скрыта по умолчанию) -->
-                <div id="btn-reset-abilities" class="hidden mb-2 items-center gap-2 cursor-pointer w-max" onclick="resetAbilities()">
-                    <i class="fa-solid fa-rotate-left text-xs text-mystic"></i>
-                    <span class="text-xs text-mystic font-sans uppercase tracking-widest">Back to Grid</span>
-                </div>
-
-                <div id="abilities-container" class="flex items-center gap-3 w-full abilities-container">
-                    <!-- Генерируется в JS -->
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- POPUP MODAL (Предметы / Лор) -->
-    <div id="glass-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
-        <!-- Размытый фон кликабельный для закрытия -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal()"></div>
+        // ВАЖНО: Здесь в реальности должен быть запрос к твоему серверу,
+        // который будет парсить statlocker и возвращать Steam ID.
+        // Пока здесь стоит мок-дата (заглушка) для демонстрации логики.
         
-        <!-- Само окно -->
-        <div class="glass relative z-10 w-full max-w-sm rounded-xl p-6 transform scale-95 opacity-0 transition-all duration-300" id="modal-box">
-            <div class="flex justify-between items-center border-b border-brass/30 pb-3 mb-4">
-                <h3 id="modal-title" class="title-serif text-2xl text-brass tracking-wide">Title</h3>
-                <button onclick="closeModal()" class="text-textMuted hover:text-textMain"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="modal-content" class="font-sans text-sm text-textMain/90 leading-relaxed space-y-2">
-                <!-- Контент -->
-            </div>
-        </div>
-    </div>
+        /* Пример реального запроса:
+           const response = await fetch(`https://твой-бэкенд.com/api/search?q=${nick}`);
+           const results = await response.json(); 
+        */
 
-    <script>
-        // Telegram Init
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#0d0e12');
-        tg.setBackgroundColor('#0d0e12');
+        const mockResults = [
+            { id: '12345678', name: nick, avatar: '🎮' },
+            { id: '87654321', name: nick + '_smurf', avatar: '🎮' }
+        ];
 
-        // MOCK DATA
-        const db = {
-            "abrams": {
-                name: "Abrams",
-                stats: { low: { pr: "18.5%", vr: "48.2%" }, mid: { pr: "15.0%", vr: "51.1%" }, high: { pr: "12.3%", vr: "54.5%" } },
-                lore: "A hardened detective with a demonic arm. He prefers to ask questions with his fists and read the answers in blood.",
-                items: "<p><strong class='text-mystic'>Core:</strong> Colossus, Siphon Bullets.</p><p><strong class='text-brass'>Situational:</strong> Silence Glyph.</p>",
-                abilities: [
-                    { name: "Siphon Life", desc: "Drains vitality from nearby enemies.", upgrades: ["+Radius", "+Damage", "-Cooldown"] },
-                    { name: "Shoulder Charge", desc: "Charge forward, pinning an enemy to a wall.", upgrades: ["+Distance", "+Stun Duration", "+Damage"] },
-                    { name: "Infernal Resilience", desc: "Passive health regeneration.", upgrades: ["+Regen", "+Armor", "Status Resist"] },
-                    { name: "Seismic Smash", desc: "Leap into the air and slam the ground.", upgrades: ["+Radius", "+Damage", "Execute low HP"] }
-                ]
-            },
-            "vindicta": {
-                name: "Vindicta",
-                stats: { low: { pr: "22.1%", vr: "46.5%" }, mid: { pr: "18.4%", vr: "49.8%" }, high: { pr: "25.2%", vr: "52.0%" } },
-                lore: "An undead sniper fueled by vengeance. She takes to the skies to deliver fatal judgments from afar.",
-                items: "<p><strong class='text-mystic'>Core:</strong> High-Velocity Mag, Glass Cannon.</p><p><strong class='text-brass'>Situational:</strong> Headhunter.</p>",
-                abilities: [
-                    { name: "Stake", desc: "Pins an enemy to their current location.", upgrades: ["+Duration", "+Damage", "Disarm"] },
-                    { name: "Flight", desc: "Take to the skies for unmatched aerial advantage.", upgrades: ["+Duration", "+Move Speed", "+Weapon Damage"] },
-                    { name: "Crow Familiar", desc: "Send a crow to deal damage and reveal.", upgrades: ["+Damage", "+Reveal Duration", "Apply Bleed"] },
-                    { name: "Assassinate", desc: "Use a scoped rifle to execute enemies.", upgrades: ["+Zoom", "+Damage", "Refund on kill"] }
-                ]
-            },
-            "seven": {
-                name: "Seven",
-                stats: { low: { pr: "30.5%", vr: "54.1%" }, mid: { pr: "25.0%", vr: "52.3%" }, high: { pr: "15.1%", vr: "48.9%" } },
-                lore: "A former prisoner of a lightning demon, Seven now commands the storm itself.",
-                items: "<p><strong class='text-mystic'>Core:</strong> Spirit Power, Mystic Reach.</p><p><strong class='text-brass'>Situational:</strong> Refresher.</p>",
-                abilities: [
-                    { name: "Lightning Ball", desc: "Fires a ball of lightning.", upgrades: ["+Radius", "+Speed", "+Damage"] },
-                    { name: "Static Charge", desc: "Stuns enemies after a delay.", upgrades: ["+Radius", "-Delay", "+Stun Duration"] },
-                    { name: "Power Surge", desc: "Attacks chain lightning to other targets.", upgrades: ["+Bounces", "+Damage", "Slow"] },
-                    { name: "Storm Cloud", desc: "Massive AoE continuous damage.", upgrades: ["+Radius", "+Damage", "+Duration"] }
-                ]
-            }
-        };
-
-        // --- NAVIGATION LOGIC ---
-        let isNavOpen = false;
-        function toggleNav() {
-            isNavOpen = !isNavOpen;
-            const container = document.getElementById('nav-container');
-            const logo = document.getElementById('nav-toggle-btn');
-            
-            if (isNavOpen) {
-                container.classList.add('nav-expanded');
-                logo.classList.add('active');
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            } else {
-                container.classList.remove('nav-expanded');
-                logo.classList.remove('active');
-            }
+        // Если найден только 1 профиль, можно сразу сохранять:
+        if (mockResults.length === 1) {
+            saveProfile(mockResults[0]);
+        } else {
+            renderProfiles(mockResults);
+            showStep('select');
         }
+    }
 
-        function switchView(viewId) {
-            // Hide all views
-            ['meta', 'heroes', 'items', 'patches'].forEach(v => {
-                document.getElementById(`view-${v}`).classList.remove('block');
-                document.getElementById(`view-${v}`).classList.add('hidden');
-            });
-            // Show selected
-            document.getElementById(`view-${viewId}`).classList.remove('hidden');
-            document.getElementById(`view-${viewId}`).classList.add('block');
-            
-            // Update UI buttons
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                if(btn.dataset.target === viewId) btn.classList.add('selected');
-                else btn.classList.remove('selected');
-            });
-            
-            toggleNav(); // Close nav menu
-        }
-
-        // --- HERO GRID LOGIC ---
-        function renderHeroes() {
-            const grid = document.getElementById('heroes-grid');
-            grid.innerHTML = Object.keys(db).map(key => `
-                <div onclick="openHeroDetail('${key}')" class="glass glass-btn aspect-[3/4] rounded-lg flex items-end justify-center p-3 cursor-pointer relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-gradient-to-t from-noir via-transparent to-transparent opacity-80"></div>
-                    <span class="title-serif text-textMain tracking-wide relative z-10 group-hover:text-brass transition-colors">${db[key].name}</span>
-                </div>
-            `).join('');
-        }
-
-        // --- HERO DETAIL LOGIC ---
-        let currentHero = null;
-        let currentRank = 'mid';
-
-        function openHeroDetail(heroId) {
-            currentHero = db[heroId];
-            
-            // Populate Data
-            document.getElementById('hd-name').innerText = currentHero.name;
-            setRank('mid'); // Reset rank
-            
-            // Reset Abilities to Grid state
-            resetAbilities();
-            
-            // Generate Ability Squares HTML
-            const abContainer = document.getElementById('abilities-container');
-            let html = currentHero.abilities.map((ab, idx) => `
-                <button id="ab-btn-${idx}" onclick="selectAbility(${idx})" class="glass-btn ability-box rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer">
-                    <span class="title-serif text-xl text-brass">${idx + 1}</span>
-                    <span class="text-[8px] font-sans uppercase tracking-widest text-textMuted px-1 text-center w-full truncate">${ab.name}</span>
-                </button>
-            `).join('');
-            
-            // Add the info panel (hidden by default)
-            html += `
-                <div id="ability-details" class="flex-1 glass rounded-lg flex-col justify-center p-3 h-16">
-                    <div class="flex justify-between items-baseline mb-1">
-                        <h4 id="ab-info-name" class="title-serif text-brass text-lg leading-none"></h4>
-                    </div>
-                    <p id="ab-info-desc" class="text-[10px] text-textMuted font-sans leading-tight line-clamp-2"></p>
-                </div>
-            `;
-            abContainer.innerHTML = html;
-
-            // Show screen
-            document.getElementById('hero-detail-view').style.display = 'block';
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        function closeHeroDetail() {
-            document.getElementById('hero-detail-view').style.display = 'none';
-            currentHero = null;
-        }
-
-        function setRank(rank) {
-            currentRank = rank;
-            // Update UI
-            document.querySelectorAll('.rank-btn').forEach(btn => {
-                if (btn.dataset.rank === rank) {
-                    btn.classList.add('text-mystic', 'font-medium'); btn.classList.remove('text-textMuted');
-                } else {
-                    btn.classList.remove('text-mystic', 'font-medium'); btn.classList.add('text-textMuted');
-                }
-            });
-            // Update numbers
-            if(currentHero) {
-                document.getElementById('hd-pr').innerText = currentHero.stats[rank].pr;
-                document.getElementById('hd-vr').innerText = currentHero.stats[rank].vr;
-            }
-            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        }
-
-        // --- ABILITIES ANIMATION LOGIC ---
-        function selectAbility(index) {
-            const container = document.getElementById('abilities-container');
-            const ab = currentHero.abilities[index];
-            
-            // Toggle classes for animation
-            container.classList.add('expanded');
-            
-            // Mark the selected button
-            for(let i=0; i<4; i++) {
-                const btn = document.getElementById(`ab-btn-${i}`);
-                if(i === index) {
-                    btn.classList.add('active-ability');
-                    // Hide name in small square, leave only number
-                    btn.querySelector('span:nth-child(2)').style.display = 'none';
-                    btn.querySelector('span:nth-child(1)').classList.replace('text-brass', 'text-mystic');
-                } else {
-                    btn.classList.remove('active-ability');
-                }
-            }
-
-            // Populate Info text
-            document.getElementById('ab-info-name').innerText = ab.name;
-            document.getElementById('ab-info-desc').innerText = ab.desc;
-            
-            // Show reset button
-            document.getElementById('btn-reset-abilities').classList.remove('hidden');
-            document.getElementById('btn-reset-abilities').classList.add('flex');
-
-            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        }
-
-        function resetAbilities() {
-            const container = document.getElementById('abilities-container');
-            if(!container) return;
-            container.classList.remove('expanded');
-            
-            for(let i=0; i<4; i++) {
-                const btn = document.getElementById(`ab-btn-${i}`);
-                if(btn) {
-                    btn.classList.remove('active-ability');
-                    btn.querySelector('span:nth-child(2)').style.display = 'block';
-                    btn.querySelector('span:nth-child(1)').classList.replace('text-mystic', 'text-brass');
-                }
-            }
-
-            document.getElementById('btn-reset-abilities').classList.add('hidden');
-            document.getElementById('btn-reset-abilities').classList.remove('flex');
-        }
-
-        // --- MODAL LOGIC (П / Л) ---
-        function openModal(type) {
-            if(!currentHero) return;
-            
-            const modal = document.getElementById('glass-modal');
-            const box = document.getElementById('modal-box');
-            
-            document.getElementById('modal-title').innerText = type === 'items' ? 'Recommended Items' : 'Background Lore';
-            document.getElementById('modal-content').innerHTML = type === 'items' ? currentHero.items : currentHero.lore;
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            // Tiny timeout to allow display:flex to apply before animating opacity
-            setTimeout(() => {
-                box.classList.remove('scale-95', 'opacity-0');
-                box.classList.add('scale-100', 'opacity-100');
-            }, 10);
-
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('glass-modal');
-            const box = document.getElementById('modal-box');
-            
-            box.classList.remove('scale-100', 'opacity-100');
-            box.classList.add('scale-95', 'opacity-0');
-            
-            setTimeout(() => {
-                modal.classList.remove('flex');
-                modal.classList.add('hidden');
-            }, 300); // Wait for transition
-        }
-
-        // INIT
-        renderHeroes();
+    // Отрисовка списка профилей
+    function renderProfiles(profiles) {
+        const container = document.getElementById('profiles-container');
+        container.innerHTML = '';
         
-        // Close nav if clicked outside
-        document.addEventListener('click', (e) => {
-            if (isNavOpen && !e.target.closest('#nav-container')) {
-                toggleNav();
-            }
+        profiles.forEach(p => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${p.avatar} <b>${p.name}</b></span> <span class="profile-id">ID: ${p.id}</span>`;
+            li.onclick = () => saveProfile(p);
+            container.appendChild(li);
         });
+    }
 
-    </script>
+    // Сохранение выбранного профиля в память телефона
+    function saveProfile(profile) {
+        localStorage.setItem('dl_profile', JSON.stringify(profile));
+        showHub(profile);
+    }
+
+    // Сброс профиля (кнопка сверху)
+    function resetProfile() {
+        localStorage.removeItem('dl_profile');
+        document.getElementById('steam-nick').value = '';
+        showStep('login');
+    }
+
+    // Показ главного хаба
+    function showHub(profile) {
+        document.getElementById('hub-title').innerText = `Профиль: ${profile.name}`;
+        showStep('hub');
+    }
+
+    // Переход на выбранный сайт
+    function openSite(baseUrl) {
+        const profile = JSON.parse(localStorage.getItem('dl_profile'));
+        if (!profile) return resetProfile();
+
+        // Формируем ссылку. Точный путь зависит от структуры сайтов.
+        // Обычно это что-то вроде statlocker.gg/profile/12345678
+        const url = `${baseUrl}/profile/${profile.id}`; 
+        
+        // Открываем ссылку внутри встроенного браузера Telegram
+        tg.openLink(url);
+    }
+
+    // Управление экранами
+    function showStep(step) {
+        document.getElementById('step-login').classList.add('hidden');
+        document.getElementById('step-select').classList.add('hidden');
+        document.getElementById('step-hub').classList.add('hidden');
+        
+        if (step === 'login') {
+            document.getElementById('header').classList.add('hidden');
+            document.getElementById('step-login').classList.remove('hidden');
+        } else if (step === 'select') {
+            document.getElementById('header').classList.add('hidden');
+            document.getElementById('step-select').classList.remove('hidden');
+        } else if (step === 'hub') {
+            document.getElementById('header').classList.remove('hidden');
+            document.getElementById('step-hub').classList.remove('hidden');
+        }
+    }
+
+    // При старте приложения проверяем, был ли профиль сохранен ранее
+    window.onload = () => {
+        const saved = localStorage.getItem('dl_profile');
+        if (saved) {
+            showHub(JSON.parse(saved));
+        } else {
+            showStep('login');
+        }
+    };
+</script>
+
 </body>
 </html>
